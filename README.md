@@ -34,23 +34,45 @@ you log in with becomes the admin.
 The image runs the app under gunicorn as a non-root user; the SQLite database lives on a
 named volume so it survives restarts.
 
+### Development
+
 ```bash
 cp .env.example .env        # set a strong SECRET_KEY (see above)
 docker compose up --build   # http://localhost:8000
 ```
 
-- In dev the magic-link emails still print to the log — `docker compose logs -f web`.
-- Seed demo puzzles on first boot by setting `SEED_DEMO=1` in the compose environment.
-- The container serves plain HTTP on `:8000`. In production put it behind an
-  HTTPS-terminating reverse proxy (geolocation puzzles require HTTPS), set
-  `SESSION_COOKIE_SECURE=true`, and point `BASE_URL` at your real URL.
-- SQLite is fine for camp-scale traffic; for heavier load point `DATABASE_URL` at Postgres.
+- The magic-link emails print to the log — `docker compose logs -f web`.
+- Seed demo puzzles on first boot by setting `SEED_DEMO=1` in the `.env`.
+- Test the image: `docker compose run --rm web pytest -q`
 
-Run the test suite inside the image:
+### Production with Traefik and Let's Encrypt
+
+Use `docker-compose.prod.yml` for production. It includes Traefik, an auto-configuring
+reverse proxy with built-in Let's Encrypt SSL.
 
 ```bash
-docker compose run --rm web pytest -q
+cp .env.example .env
+
+# Set in .env:
+# - SECRET_KEY: strong random string (see Quick start)
+# - APP_DOMAIN: your domain (e.g., emf-hunt.example.com)
+# - ACME_EMAIL: for Let's Encrypt renewal notices (e.g., admin@example.com)
+# - EMAIL_BACKEND: set to "api" and configure EMAIL_API_URL / EMAIL_API_KEY
+
+docker compose -f docker-compose.prod.yml up -d
 ```
+
+Traefik will:
+- Automatically obtain and renew TLS certificates from Let's Encrypt
+- Redirect HTTP → HTTPS
+- Route traffic to the Flask app
+- Store certificates on a persistent volume
+
+The app is available at `https://YOUR_APP_DOMAIN`. Ensure:
+- Your DNS points to the server's public IP
+- Ports **80** and **443** are open (Let's Encrypt requires HTTP-01 challenge)
+
+SQLite is fine for camp-scale traffic; for heavier load, point `DATABASE_URL` at Postgres.
 
 ### Published image (GHCR)
 
