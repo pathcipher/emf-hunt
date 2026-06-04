@@ -49,6 +49,11 @@ def create_app(config_object: type = Config) -> Flask:
         # Liveness probe for Docker / load balancers — no auth, no DB.
         return "ok", 200
 
+    @app.context_processor
+    def inject_site_name():
+        # Makes {{ site_name }} available in every template.
+        return {"site_name": app.config["SITE_NAME"]}
+
     _register_security_headers(app)
     _register_error_handlers(app)
     _register_cli(app)

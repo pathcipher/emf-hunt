@@ -1,4 +1,4 @@
-# EMF Hunt
+# Pathcipher@EMF
 
 A mobile-first puzzle-hunt webapp for EMF Camp 2026, built with Flask.
 

@@ -24,6 +24,9 @@ class Config:
     # Public base URL used to build absolute magic links.
     BASE_URL = os.environ.get("BASE_URL", "http://localhost:8000")
 
+    # Display name shown across the UI and in emails.
+    SITE_NAME = os.environ.get("SITE_NAME", "Pathcipher@EMF")
+
     # Email delivery
     EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "console")
     EMAIL_FROM = os.environ.get("EMAIL_FROM", "EMF Hunt <hunt@example.org>")

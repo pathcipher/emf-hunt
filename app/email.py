@@ -58,14 +58,15 @@ def _send_api(to: str, subject: str, text: str, html: str | None) -> None:
 
 
 def send_magic_link(email: str, link: str) -> None:
-    subject = "Your EMF Hunt login link"
+    site = current_app.config["SITE_NAME"]
+    subject = f"Your {site} login link"
     text = (
-        "Tap the link below to log in to EMF Hunt. It expires shortly and can only be "
+        f"Tap the link below to log in to {site}. It expires shortly and can only be "
         f"used once:\n\n{link}\n\nIf you didn't request this, you can ignore this email."
     )
     html = (
-        "<p>Tap to log in to <strong>EMF Hunt</strong> — expires shortly, single use:</p>"
-        f'<p><a href="{link}">Log in to EMF Hunt</a></p>'
+        f"<p>Tap to log in to <strong>{site}</strong> — expires shortly, single use:</p>"
+        f'<p><a href="{link}">Log in to {site}</a></p>'
         "<p>If you didn't request this, you can ignore this email.</p>"
     )
     send_email(email, subject, text, html)

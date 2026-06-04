@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ puzzle.title }} · EMF Hunt{% endblock %}
+{% block title %}{{ puzzle.title }} · {{ site_name }}{% endblock %}
 {% block content %}
 <div class="progress-pill">
   Puzzle {{ puzzle.order_index }}{% if total %} · {{ solved_count }}/{{ total }} solved{% endif %}
