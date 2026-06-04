@@ -1,0 +1,22 @@
+# Keep secrets, local data, and cruft out of the build context / image.
+.git
+.gitignore
+.dockerignore
+
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Never bake secrets or the local database into the image.
+.env
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+.DS_Store
+*.swp

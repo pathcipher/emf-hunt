@@ -1,0 +1,23 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    # Secrets (SECRET_KEY, EMAIL_*) come from your host .env — copy .env.example first.
+    env_file:
+      - .env
+    environment:
+      # Keep the SQLite DB on the mounted volume so it survives restarts.
+      DATABASE_URL: "sqlite:////app/instance/emf_hunt.db"
+      # How the app is reached when running locally via compose (used in magic links).
+      BASE_URL: "http://localhost:8000"
+      # Behind an HTTPS-terminating proxy in production, set this true.
+      SESSION_COOKIE_SECURE: "false"
+      # Set to 1 to seed demo puzzles on first boot.
+      SEED_DEMO: "0"
+    volumes:
+      - hunt-data:/app/instance
+    restart: unless-stopped
+
+volumes:
+  hunt-data:
