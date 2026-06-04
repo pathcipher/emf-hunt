@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Virtualenv
+venv/
+.venv/
+env/
+
+# Secrets — never commit
+.env
+
+# Database: contains puzzle answers AND personal emails. Never commit.
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# OS / editor cruft
+.DS_Store
+*.swp

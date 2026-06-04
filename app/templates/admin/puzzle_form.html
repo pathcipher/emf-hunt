@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ 'New' if mode == 'new' else 'Edit' }} puzzle · Admin{% endblock %}
+{% block content %}
+<h1>{{ 'New puzzle' if mode == 'new' else 'Edit puzzle' }}</h1>
+
+<form method="post" class="card">
+  {{ form.hidden_tag() }}
+
+  <label for="order_index">Order</label>
+  {{ form.order_index(id="order_index", inputmode="numeric") }}
+  {% for e in form.order_index.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+
+  <label for="title">Title</label>
+  {{ form.title(id="title", maxlength="160") }}
+  {% for e in form.title.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+
+  <label for="content_html">
+    Puzzle HTML <span class="muted">— HTML &amp; JS allowed (trusted authoring)</span>
+  </label>
+  {{ form.content_html(id="content_html", rows="14", class="code", spellcheck="false") }}
+  {% for e in form.content_html.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+
+  <label for="answer">
+    Answer <span class="muted">— matched case- and space-insensitively</span>
+  </label>
+  {{ form.answer(id="answer", maxlength="255", autocomplete="off") }}
+  {% for e in form.answer.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+
+  <label class="checkbox">{{ form.is_published() }} Published (visible to players)</label>
+
+  <div class="form-actions">
+    {{ form.submit(class="btn") }}
+    <a class="btn btn-secondary" href="{{ url_for('admin.puzzles') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ puzzle.title }} · EMF Hunt{% endblock %}
+{% block content %}
+<div class="progress-pill">
+  Puzzle {{ puzzle.order_index }}{% if total %} · {{ solved_count }}/{{ total }} solved{% endif %}
+</div>
+<h1>{{ puzzle.title }}</h1>
+
+<article class="puzzle-body">
+  {# Trusted admin-authored content. May contain HTML & JS (e.g. Geolocation). #}
+  {{ puzzle.content_html | safe }}
+</article>
+
+{% if already_solved %}
+  <p class="solved-note">✓ Your team already solved this one.</p>
+  <p><a class="btn" href="{{ url_for('puzzles.index') }}">Back to current puzzle →</a></p>
+{% else %}
+  <form method="post" action="{{ url_for('puzzles.submit', order=puzzle.order_index) }}" class="card">
+    {{ form.hidden_tag() }}
+    <label for="answer">Your answer</label>
+    {{ form.answer(id="answer", autocomplete="off", autocapitalize="none",
+                   autocorrect="off", spellcheck="false", placeholder="Type your answer") }}
+    {% for err in form.answer.errors %}<p class="field-error">{{ err }}</p>{% endfor %}
+    {{ form.submit(class="btn") }}
+  </form>
+{% endif %}
+{% endblock %}

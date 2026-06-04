@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Submissions · Admin{% endblock %}
+{% block content %}
+<h1>Live submissions</h1>
+
+<form method="get" action="{{ url_for('admin.submissions') }}" class="filter-bar" id="filter-form">
+  <select name="team" aria-label="Filter by team">
+    <option value="">All teams</option>
+    {% for t in teams %}
+      <option value="{{ t.id }}" {% if sel_team == t.id %}selected{% endif %}>{{ t.name }}</option>
+    {% endfor %}
+  </select>
+  <select name="puzzle" aria-label="Filter by puzzle">
+    <option value="">All puzzles</option>
+    {% for p in puzzles %}
+      <option value="{{ p.id }}" {% if sel_puzzle == p.id %}selected{% endif %}>#{{ p.order_index }} — {{ p.title }}</option>
+    {% endfor %}
+  </select>
+  <select name="result" aria-label="Filter by result">
+    <option value="all" {% if sel_result == 'all' %}selected{% endif %}>All results</option>
+    <option value="correct" {% if sel_result == 'correct' %}selected{% endif %}>Correct only</option>
+    <option value="wrong" {% if sel_result == 'wrong' %}selected{% endif %}>Wrong only</option>
+  </select>
+  <button type="submit" class="btn btn-secondary">Filter</button>
+</form>
+
+<div class="feed-status">
+  <span class="live-dot" id="live-dot" aria-hidden="true"></span>
+  <span id="live-label">Live</span>
+  <span class="muted" id="feed-count">{{ submissions|length }} shown</span>
+</div>
+
+<ul class="feed" id="feed"
+    data-feed-url="{{ url_for('admin.submissions_feed') }}"
+    data-cursor="{{ cursor }}">
+  {% for s in submissions %}
+  <li class="feed-row {{ 'ok' if s.is_correct else 'no' }}">
+    <span class="feed-time">{{ s.created_at.strftime('%H:%M:%S') }}</span>
+    <span class="feed-main">
+      <span class="feed-team">{{ s.team.name if s.team else '—' }}</span>
+      <span class="feed-meta">{{ (s.user.display_name or s.user.email) if s.user else '—' }} · {% if s.puzzle %}#{{ s.puzzle.order_index }}{% else %}—{% endif %}</span>
+      <span class="feed-text">{{ s.text }}</span>
+    </span>
+    <span class="feed-flag">{{ '✓' if s.is_correct else '✗' }}</span>
+  </li>
+  {% else %}
+  <li class="muted" id="feed-empty">No submissions yet.</li>
+  {% endfor %}
+</ul>
+
+<script>
+(function () {
+  var feed = document.getElementById('feed');
+  var form = document.getElementById('filter-form');
+  if (!feed) return;
+  var url = feed.dataset.feedUrl;
+  var cursor = parseInt(feed.dataset.cursor || '0', 10);
+  var countEl = document.getElementById('feed-count');
+  var dot = document.getElementById('live-dot');
+  var MAX_ROWS = 300;
+  var selects = form ? Array.prototype.slice.call(form.querySelectorAll('select')) : [];
+
+  function buildQuery(includeAfter) {
+    var p = new URLSearchParams();
+    if (includeAfter) p.set('after', cursor);
+    selects.forEach(function (sel) {
+      if (sel.value && !(sel.name === 'result' && sel.value === 'all')) {
+        p.set(sel.name, sel.value);
+      }
+    });
+    return p.toString();
+  }
+
+  function updateCount() {
+    if (countEl) countEl.textContent = feed.querySelectorAll('.feed-row').length + ' shown';
+  }
+
+  function makeRow(s) {
+    var li = document.createElement('li');
+    li.className = 'feed-row new ' + (s.correct ? 'ok' : 'no');
+
+    var time = document.createElement('span');
+    time.className = 'feed-time';
+    time.textContent = s.time;
+
+    var main = document.createElement('span');
+    main.className = 'feed-main';
+    var team = document.createElement('span');
+    team.className = 'feed-team';
+    team.textContent = s.team;
+    var meta = document.createElement('span');
+    meta.className = 'feed-meta';
+    meta.textContent = s.player + ' · ' + s.puzzle;
+    var text = document.createElement('span');
+    text.className = 'feed-text';
+    text.textContent = s.text;            // textContent => no markup injection
+    main.appendChild(team);
+    main.appendChild(meta);
+    main.appendChild(text);
+
+    var flag = document.createElement('span');
+    flag.className = 'feed-flag';
+    flag.textContent = s.correct ? '✓' : '✗';
+
+    li.appendChild(time);
+    li.appendChild(main);
+    li.appendChild(flag);
+    return li;
+  }
+
+  function prependAll(list) {
+    var empty = document.getElementById('feed-empty');
+    if (list.length && empty) empty.remove();
+    list.forEach(function (s) { feed.insertBefore(makeRow(s), feed.firstChild); });
+    while (feed.querySelectorAll('.feed-row').length > MAX_ROWS) {
+      feed.removeChild(feed.lastElementChild);
+    }
+    updateCount();
+  }
+
+  function showEmpty() {
+    var li = document.createElement('li');
+    li.className = 'muted';
+    li.id = 'feed-empty';
+    li.textContent = 'No submissions match these filters yet.';
+    feed.appendChild(li);
+    updateCount();
+  }
+
+  // Incremental: pull only rows newer than the cursor, for the current filters.
+  function poll() {
+    fetch(url + '?' + buildQuery(true), { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+      .then(function (data) {
+        if (dot) dot.classList.remove('stale');
+        prependAll(data.submissions);
+        cursor = data.cursor;
+      })
+      .catch(function () { if (dot) dot.classList.add('stale'); });
+  }
+
+  // Filters changed: rebuild the WHOLE table from a fresh snapshot.
+  function refresh() {
+    cursor = 0;
+    feed.innerHTML = '';
+    var q = buildQuery(false);
+    if (window.history && history.replaceState) {
+      history.replaceState(null, '', q ? '?' + q : location.pathname);
+    }
+    fetch(url + '?' + q, { headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+      .then(function (data) {
+        if (dot) dot.classList.remove('stale');
+        if (data.submissions.length) { prependAll(data.submissions); }
+        else { showEmpty(); }
+        cursor = data.cursor;
+      })
+      .catch(function () { if (dot) dot.classList.add('stale'); });
+  }
+
+  selects.forEach(function (sel) { sel.addEventListener('change', refresh); });
+  if (form) form.addEventListener('submit', function (e) { e.preventDefault(); refresh(); });
+
+  setInterval(function () { if (!document.hidden) poll(); }, 4000);
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}You finished! · EMF Hunt{% endblock %}
+{% block content %}
+<h1>🚀 You did it, {{ team.name }}!</h1>
+<p>Your team has solved every puzzle in the hunt. Stellar work.</p>
+<p><a class="btn btn-secondary" href="{{ url_for('teams.view') }}">Back to your team</a></p>
+{% endblock %}

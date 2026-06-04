@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Teams · Admin{% endblock %}
+{% block content %}
+<h1>Teams</h1>
+<p class="muted">{{ rows|length }} team(s)</p>
+
+<ul class="admin-list">
+  {% for r in rows %}
+  <li class="card">
+    <div class="admin-list-row">
+      <a class="admin-list-title" href="{{ url_for('admin.team_detail', team_id=r.team.id) }}">{{ r.team.name }}</a>
+      <span class="badge">{{ r.members }} member{{ '' if r.members == 1 else 's' }}</span>
+    </div>
+    <span class="muted">
+      {{ r.solved }}/{{ r.total }}{% if r.current %} · on #{{ r.current.order_index }}{% elif r.total %} · done{% endif %}
+    </span>
+  </li>
+  {% else %}
+  <li class="muted">No teams yet.</li>
+  {% endfor %}
+</ul>
+
+{% if unassigned %}
+<h2>Unassigned players</h2>
+<p class="muted">Players not on any team yet.</p>
+<ul class="member-admin-list">
+  {% for u in unassigned %}
+  <li class="card">
+    <div class="member-head">
+      <span class="admin-list-title">{{ u.display_name or u.email }}</span>
+      {% if u.is_admin %}<span class="badge badge-on">admin</span>{% endif %}
+    </div>
+    <form method="post" action="{{ url_for('admin.member_move', user_id=u.id) }}" class="inline-form move-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <select name="team_id" aria-label="Assign to team">
+        <option value="">— pick a team —</option>
+        {% for t in all_teams %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="btn btn-secondary btn-sm">Assign</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

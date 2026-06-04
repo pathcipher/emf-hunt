@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Check your email · EMF Hunt{% endblock %}
+{% block content %}
+<h1>Check your email</h1>
+<p>A login link is on its way to <strong>{{ email }}</strong>. It expires in a few
+minutes and can be used once.</p>
+<p class="muted">Running locally? The link is printed in the server console.</p>
+<p><a href="{{ url_for('auth.login') }}">Use a different email</a></p>
+{% endblock %}

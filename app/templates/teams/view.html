@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ team.name }} · EMF Hunt{% endblock %}
+{% block content %}
+<h1>{{ team.name }}</h1>
+
+<div class="card">
+  <p class="muted">Share this code so teammates can join your team:</p>
+  <p class="join-code">{{ team.join_code }}</p>
+</div>
+
+<div class="card">
+  <h2>Crew ({{ team.members|length }})</h2>
+  <ul class="member-list">
+    {% for member in team.members %}
+    <li>
+      {{ member.display_name or member.email }}
+      {% if member.is_admin %}<span class="badge">admin</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<p><a class="btn" href="{{ url_for('puzzles.index') }}">Go to your puzzle →</a></p>
+{% endblock %}

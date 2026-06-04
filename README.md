@@ -1,0 +1,123 @@
+# EMF Hunt
+
+A mobile-first puzzle-hunt webapp for EMF Camp 2026, built with Flask.
+
+Teams progress through puzzles one at a time via magic-link login (no passwords).
+The first user to log in becomes an admin and can author puzzles, set answers, and
+watch every team's progress.
+
+## Quick start
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+cp .env.example .env
+# set a strong SECRET_KEY:
+python -c "import secrets; print(secrets.token_hex(32))"   # paste into .env
+
+flask init-db        # create the database tables
+flask seed-demo      # optional: a few fake demo puzzles (incl. a GPS one)
+flask run --debug    # http://localhost:8000
+```
+
+> `.flaskenv` sets `FLASK_APP=wsgi` and the dev port to **8000**, so the `flask`
+> commands work without flags. Both dev and Docker use 8000.
+
+In development `EMAIL_BACKEND=console`, so the magic-link login URL is **printed to
+the server log** — copy it from the terminal to "receive" the email. The first email
+you log in with becomes the admin.
+
+## Run with Docker
+
+The image runs the app under gunicorn as a non-root user; the SQLite database lives on a
+named volume so it survives restarts.
+
+```bash
+cp .env.example .env        # set a strong SECRET_KEY (see above)
+docker compose up --build   # http://localhost:8000
+```
+
+- In dev the magic-link emails still print to the log — `docker compose logs -f web`.
+- Seed demo puzzles on first boot by setting `SEED_DEMO=1` in the compose environment.
+- The container serves plain HTTP on `:8000`. In production put it behind an
+  HTTPS-terminating reverse proxy (geolocation puzzles require HTTPS), set
+  `SESSION_COOKIE_SECURE=true`, and point `BASE_URL` at your real URL.
+- SQLite is fine for camp-scale traffic; for heavier load point `DATABASE_URL` at Postgres.
+
+Run the test suite inside the image:
+
+```bash
+docker compose run --rm web pytest -q
+```
+
+### Published image (GHCR)
+
+Pushes to `main` (and `v*` tags) run the test suite, then build and publish the image to
+the GitHub Container Registry via
+[`.github/workflows/docker-publish.yml`](.github/workflows/docker-publish.yml):
+
+```bash
+docker run -p 8000:8000 --env-file .env ghcr.io/<owner>/emf-hunt:latest
+```
+
+Authentication uses the built-in `GITHUB_TOKEN` — no extra secrets to configure. Pull
+requests build the image (to catch breakage) but do not publish. The package starts out
+private; make it public in the repo's **Packages** settings if you want unauthenticated pulls.
+
+## Security model
+
+This repo is safe to make public. None of the sensitive material lives in code:
+
+- **No passwords.** Login is a single-use, time-limited, hashed magic-link token.
+- **No secrets in the repo.** `SECRET_KEY`, the database URL, and email-provider
+  credentials all come from `.env` (gitignored).
+- **No puzzle answers in the repo.** Answers live only in the database (`*.db`,
+  gitignored), edited through the admin UI.
+- **Trust boundary.** Puzzle content is a *trusted admin authoring surface* — admins
+  may write arbitrary HTML/JS (some puzzles use the browser Geolocation API), so puzzle
+  HTML is rendered as-is. Every **player-supplied** value (email, team name, submitted
+  answer) is escaped/parameterized and never rendered raw. Protect admin accounts
+  accordingly.
+- SQL injection is avoided via the SQLAlchemy ORM; CSRF tokens guard every form;
+  magic-link and answer submissions are rate-limited.
+
+> Geolocation puzzles require a **secure context**: GPS only works over HTTPS (or
+> `localhost`). Serve production over TLS.
+
+## Email in production
+
+Set `EMAIL_BACKEND=api` and point `EMAIL_API_URL` / `EMAIL_API_KEY` at a transactional
+email provider (Mailgun, Postmark, Resend, SendGrid, SES). The backend interface lives
+in [`app/email.py`](app/email.py) — adapt the request shape to your provider.
+
+## Layout
+
+```
+app/
+  __init__.py     app factory, security headers, CLI commands
+  extensions.py   db / login / csrf / limiter
+  models.py       User, Team, Puzzle, Solve, Submission, LoginToken
+  security.py     magic tokens, answer normalization, admin_required
+  email.py        pluggable email backends (console | api)
+  auth/  teams/  puzzles/  admin/    blueprints
+  templates/  static/
+config.py         env-driven configuration
+wsgi.py           entrypoint
+tests/            pytest suite
+```
+
+## Tests
+
+```bash
+pytest
+```
+
+## AI disclaimer
+
+This project was built with significant assistance from an AI coding agent
+(Anthropic's Claude, via Claude Code). All code is human-reviewed before use, but treat it
+as you would any contribution: read it before you rely on it, and give the security-sensitive
+paths — magic-link auth, the admin trust boundary, and answer handling — an extra look prior
+to running a live event.

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Team progress · Admin{% endblock %}
+{% block content %}
+<h1>Team progress</h1>
+<p class="muted">{{ rows|length }} team(s) · {{ total }} published puzzle(s)</p>
+
+<ul class="admin-list">
+  {% for r in rows %}
+  <li class="card">
+    <div class="admin-list-row">
+      <a class="admin-list-title" href="{{ url_for('admin.team_detail', team_id=r.team.id) }}">{{ r.team.name }}</a>
+      <span class="badge">{{ r.solved }}/{{ r.total }}</span>
+    </div>
+    <p class="muted">
+      {% if r.current %}
+        On puzzle #{{ r.current.order_index }}: {{ r.current.title }}
+      {% else %}
+        Finished 🎉
+      {% endif %}
+      {% if r.last_solved_at %} · last solve {{ r.last_solved_at.strftime('%Y-%m-%d %H:%M') }}{% endif %}
+    </p>
+    <p class="muted crew">Crew:
+      {% for m in r.members %}{{ m.display_name or m.email }}{% if not loop.last %}, {% endif %}{% endfor %}
+    </p>
+  </li>
+  {% else %}
+  <li class="muted">No teams yet.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

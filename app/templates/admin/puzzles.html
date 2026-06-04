@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Puzzles · Admin{% endblock %}
+{% block content %}
+<h1>Puzzles</h1>
+<p><a class="btn" href="{{ url_for('admin.puzzle_new') }}">+ New puzzle</a></p>
+
+<ul class="admin-list">
+  {% for p in puzzles %}
+  <li class="card">
+    <div class="admin-list-row">
+      <span class="order-badge">#{{ p.order_index }}</span>
+      <span class="admin-list-title">{{ p.title }}</span>
+      {% if p.is_published %}
+        <span class="badge badge-on">live</span>
+      {% else %}
+        <span class="badge">draft</span>
+      {% endif %}
+    </div>
+    <a href="{{ url_for('admin.puzzle_edit', puzzle_id=p.id) }}">Edit →</a>
+  </li>
+  {% else %}
+  <li class="muted">No puzzles yet. Create the first one.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

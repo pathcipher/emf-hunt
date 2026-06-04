@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Mission Control · Admin{% endblock %}
+{% block content %}
+<h1>Mission Control</h1>
+
+<div class="stat-grid">
+  <div class="card stat">
+    <span class="stat-num">{{ stats.published }}/{{ stats.puzzles }}</span>
+    <span class="stat-label">puzzles live</span>
+  </div>
+  <div class="card stat">
+    <span class="stat-num">{{ stats.teams }}</span>
+    <span class="stat-label">teams</span>
+  </div>
+  <div class="card stat">
+    <span class="stat-num">{{ stats.players }}</span>
+    <span class="stat-label">players</span>
+  </div>
+  <div class="card stat">
+    <span class="stat-num">{{ stats.submissions }}</span>
+    <span class="stat-label">submissions</span>
+  </div>
+</div>
+
+<div class="admin-actions">
+  <a class="btn" href="{{ url_for('admin.puzzles') }}">Manage puzzles</a>
+  <a class="btn btn-secondary" href="{{ url_for('admin.teams') }}">Manage teams</a>
+  <a class="btn btn-secondary" href="{{ url_for('admin.submissions') }}">Live submissions</a>
+  <a class="btn btn-secondary" href="{{ url_for('admin.progress') }}">Team progress</a>
+</div>
+{% endblock %}

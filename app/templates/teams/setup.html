@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Your team · EMF Hunt{% endblock %}
+{% block content %}
+<h1>Join the crew</h1>
+<p class="muted">Puzzles are solved as a team. Start one, or join with a code.</p>
+
+<form method="post" action="{{ url_for('teams.create') }}" class="card">
+  {{ create_form.hidden_tag() }}
+  <h2>Create a team</h2>
+  <label for="name">Team name</label>
+  {{ create_form.name(id="name", maxlength="80", placeholder="The Cosmic Rays") }}
+  {% for err in create_form.name.errors %}<p class="field-error">{{ err }}</p>{% endfor %}
+  {{ create_form.submit(class="btn") }}
+</form>
+
+<form method="post" action="{{ url_for('teams.join') }}" class="card">
+  {{ join_form.hidden_tag() }}
+  <h2>Join a team</h2>
+  <label for="join_code">Join code</label>
+  {{ join_form.join_code(id="join_code", maxlength="12", autocapitalize="characters",
+                         autocomplete="off", placeholder="ABC123") }}
+  {% for err in join_form.join_code.errors %}<p class="field-error">{{ err }}</p>{% endfor %}
+  {{ join_form.submit(class="btn btn-secondary") }}
+</form>
+{% endblock %}

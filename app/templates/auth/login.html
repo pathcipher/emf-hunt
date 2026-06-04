@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Log in · EMF Hunt{% endblock %}
+{% block content %}
+<h1>Enter the Hunt</h1>
+<p class="muted">We'll email you a one-time login link</p>
+
+<form method="post" action="{{ url_for('auth.login') }}" class="card">
+  {{ form.hidden_tag() }}
+  <label for="email">Email</label>
+  {{ form.email(id="email", type="email", autocomplete="email", inputmode="email",
+                placeholder="you@example.org") }}
+  {% for err in form.email.errors %}<p class="field-error">{{ err }}</p>{% endfor %}
+  {{ form.submit(class="btn") }}
+</form>
+{% endblock %}

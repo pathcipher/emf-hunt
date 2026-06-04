@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ team.name }} · Admin{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin.teams') }}">← All teams</a></p>
+<h1>{{ team.name }}</h1>
+
+<div class="card">
+  <form method="post" action="{{ url_for('admin.team_rename', team_id=team.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="name">Team name</label>
+    <input type="text" id="name" name="name" maxlength="80" value="{{ team.name }}">
+    <button type="submit" class="btn btn-sm">Rename</button>
+  </form>
+</div>
+
+<div class="card">
+  <p class="muted">Join code</p>
+  <p class="join-code">{{ team.join_code }}</p>
+  <form method="post" action="{{ url_for('admin.team_regen_code', team_id=team.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn btn-secondary btn-sm">Regenerate code</button>
+  </form>
+</div>
+
+<div class="card">
+  <p class="muted">Progress</p>
+  <p>{{ solved }}/{{ total }} solved ·
+    {% if current %}on #{{ current.order_index }} — {{ current.title }}{% else %}finished 🎉{% endif %}
+  </p>
+</div>
+
+<h2>Members ({{ team.members|length }})</h2>
+<ul class="member-admin-list">
+  {% for m in team.members %}
+  <li class="card">
+    <div class="member-head">
+      <span class="admin-list-title">{{ m.display_name or m.email }}</span>
+      {% if m.is_admin %}<span class="badge badge-on">admin</span>{% endif %}
+    </div>
+    <div class="member-actions">
+      <form method="post" action="{{ url_for('admin.member_toggle_admin', user_id=m.id) }}" class="inline-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="return_team" value="{{ team.id }}">
+        <button type="submit" class="btn btn-secondary btn-sm">{{ 'Remove admin' if m.is_admin else 'Make admin' }}</button>
+      </form>
+      <form method="post" action="{{ url_for('admin.member_move', user_id=m.id) }}" class="inline-form move-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="return_team" value="{{ team.id }}">
+        <select name="team_id" aria-label="Move {{ m.display_name or m.email }}">
+          <option value="">— Remove from team —</option>
+          {% for ot in other_teams %}<option value="{{ ot.id }}">Move to {{ ot.name }}</option>{% endfor %}
+        </select>
+        <button type="submit" class="btn btn-secondary btn-sm">Apply</button>
+      </form>
+    </div>
+  </li>
+  {% else %}
+  <li class="muted">No members on this team.</li>
+  {% endfor %}
+</ul>
+
+<div class="card danger-zone">
+  <p class="muted">Danger zone</p>
+  <form method="post" action="{{ url_for('admin.team_delete', team_id=team.id) }}"
+        onsubmit="return confirm('Delete this team? This removes its solves and submissions and unassigns its members.');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn btn-danger btn-sm">Delete team</button>
+  </form>
+</div>
+{% endblock %}
