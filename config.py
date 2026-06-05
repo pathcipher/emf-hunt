@@ -27,6 +27,11 @@ class Config:
     # Display name shown across the UI and in emails.
     SITE_NAME = os.environ.get("SITE_NAME", "Pathcipher@EMF")
 
+    # Contact details for the footer (optional; omitted if unset).
+    CONTACT_NAME = os.environ.get("CONTACT_NAME", "")
+    CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")
+    CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "")
+
     # Email delivery
     EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "console")
     EMAIL_FROM = os.environ.get("EMAIL_FROM", "EMF Hunt <hunt@example.org>")

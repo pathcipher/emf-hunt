@@ -48,6 +48,14 @@
 
   <footer class="site-footer container">
     <p class="muted">EMF Camp 2026 · solve as a team</p>
+    {% if contact_name or contact_email or contact_phone %}
+      <p class="muted">
+        If you have any issues with the site or any puzzles, please contact
+        {%- if contact_name %} <strong>{{ contact_name }}</strong>{% endif %}
+        {%- if contact_email %} on <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>{% endif %}
+        {%- if contact_phone %} or <a href="tel:{{ contact_phone }}">{{ contact_phone }}</a>{% endif %}.
+      </p>
+    {% endif %}
   </footer>
 </body>
 </html>

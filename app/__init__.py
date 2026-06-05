@@ -50,9 +50,14 @@ def create_app(config_object: type = Config) -> Flask:
         return "ok", 200
 
     @app.context_processor
-    def inject_site_name():
-        # Makes {{ site_name }} available in every template.
-        return {"site_name": app.config["SITE_NAME"]}
+    def inject_template_globals():
+        # Make site_name and contact info available in every template.
+        return {
+            "site_name": app.config["SITE_NAME"],
+            "contact_name": app.config["CONTACT_NAME"],
+            "contact_email": app.config["CONTACT_EMAIL"],
+            "contact_phone": app.config["CONTACT_PHONE"],
+        }
 
     _register_security_headers(app)
     _register_error_handlers(app)
