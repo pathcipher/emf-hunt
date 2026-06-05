@@ -192,7 +192,7 @@ textarea.code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace
 .admin-actions { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1.2rem; }
 .admin-list { list-style: none; padding: 0; margin: 1rem 0; }
 .admin-list li.card { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; }
-.admin-list-row { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+.admin-list-row { display: flex; align-items: center; gap: 0.6rem; min-width: 0; flex: 1; }
 .admin-list-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .order-badge { color: var(--muted); font-variant-numeric: tabular-nums; }
 .crew { word-break: break-word; }
