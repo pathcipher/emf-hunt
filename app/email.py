@@ -2,9 +2,11 @@
 
 - EMAIL_BACKEND=console  → development: the message (with the magic link) is written
   to the server log. No credentials needed.
+- EMAIL_BACKEND=ses      → AWS SES (Simple Email Service). Requires AWS credentials
+  (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION env vars).
 - EMAIL_BACKEND=api      → production: POST to a transactional email provider's HTTP
   API. The JSON shape below is provider-generic; adapt `_send_api` to Mailgun /
-  Postmark / Resend / SendGrid / SES as needed.
+  Postmark / Resend / etc. as needed.
 """
 from __future__ import annotations
 
@@ -18,7 +20,9 @@ logger = logging.getLogger("emf_hunt.email")
 
 def send_email(to: str, subject: str, text: str, html: str | None = None) -> None:
     backend = current_app.config.get("EMAIL_BACKEND", "console")
-    if backend == "api":
+    if backend == "ses":
+        _send_ses(to, subject, text, html)
+    elif backend == "api":
         _send_api(to, subject, text, html)
     else:
         _send_console(to, subject, text, html)
@@ -32,6 +36,27 @@ def _send_console(to: str, subject: str, text: str, html: str | None) -> None:
         to,
         subject,
         text,
+    )
+
+
+def _send_ses(to: str, subject: str, text: str, html: str | None) -> None:
+    try:
+        import boto3
+    except ImportError:
+        raise RuntimeError(
+            "EMAIL_BACKEND=ses requires boto3. Install it with: pip install boto3"
+        )
+    client = boto3.client("ses")
+    client.send_email(
+        Source=current_app.config["EMAIL_FROM"],
+        Destination={"ToAddresses": [to]},
+        Message={
+            "Subject": {"Data": subject},
+            "Body": {
+                "Text": {"Data": text},
+                "Html": {"Data": html or text},
+            },
+        },
     )
 
 

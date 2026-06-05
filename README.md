@@ -110,9 +110,15 @@ This repo is safe to make public. None of the sensitive material lives in code:
 
 ## Email in production
 
-Set `EMAIL_BACKEND=api` and point `EMAIL_API_URL` / `EMAIL_API_KEY` at a transactional
-email provider (Mailgun, Postmark, Resend, SendGrid, SES). The backend interface lives
-in [`app/email.py`](app/email.py) — adapt the request shape to your provider.
+Choose an email backend:
+
+- **`EMAIL_BACKEND=ses`** — AWS SES (Simple Email Service). Free tier: 62,000 emails/month
+  (effectively unlimited for a weekend event). Requires AWS credentials (see `.env.example`).
+  Cost: ~$0.10 per 1,000 emails after free tier.
+
+- **`EMAIL_BACKEND=api`** — other transactional email providers (Mailgun, Postmark, Resend,
+  SendGrid, etc.). The backend interface lives in [`app/email.py`](app/email.py) — adapt
+  the request shape to your provider.
 
 ## Layout
 
@@ -122,7 +128,7 @@ app/
   extensions.py   db / login / csrf / limiter
   models.py       User, Team, Puzzle, Solve, Submission, LoginToken
   security.py     magic tokens, answer normalization, admin_required
-  email.py        pluggable email backends (console | api)
+  email.py        pluggable email backends (console | ses | api)
   auth/  teams/  puzzles/  admin/    blueprints
   templates/  static/
 config.py         env-driven configuration
