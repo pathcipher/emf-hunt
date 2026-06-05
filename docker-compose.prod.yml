@@ -58,6 +58,13 @@ services:
       - "traefik.http.routers.emf-hunt.tls.certresolver=letsencrypt"
       - "traefik.http.services.emf-hunt.loadbalancer.server.port=8000"
 
+  watchtower:
+    image: containrrr/watchtower:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 300 --cleanup
+    restart: unless-stopped
+
 volumes:
   hunt-data:
   traefik-data:
