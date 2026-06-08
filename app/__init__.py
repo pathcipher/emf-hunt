@@ -42,10 +42,10 @@ def _reconcile_schema() -> None:
         for col_name in missing:
             col = table.columns[col_name]
             # Build ALTER TABLE statement
-            col_type = col.type.compile(db.engine)
+            col_type = str(col.type)
             nullable = "NOT NULL" if not col.nullable else ""
             default = f"DEFAULT {col.default.arg}" if col.default else ""
-            alter_stmt = f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_type} {nullable} {default}"
+            alter_stmt = f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_type} {nullable} {default}".strip()
             try:
                 db.session.execute(text(alter_stmt))
                 logger.info(f"Added missing column {table_name}.{col_name}")
