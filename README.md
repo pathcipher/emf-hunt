@@ -120,6 +120,39 @@ Choose an email backend:
   SendGrid, etc.). The backend interface lives in [`app/email.py`](app/email.py) — adapt
   the request shape to your provider.
 
+## Dynamic puzzle content
+
+Puzzles can fetch content from a remote handler URL for time-based or dynamic content (e.g.,
+puzzles that change based on the current time or pull data from an external source).
+
+**Setup:**
+1. Create a separate service that accepts HTTP GET requests with query params:
+   - `puzzle_id` (int)
+   - `team_id` (int)
+   - `at` (ISO 8601 timestamp)
+   - Returns HTML content
+
+2. In the admin UI, when editing a puzzle, set the **Handler URL** field to your service
+   endpoint (e.g., `https://puzzles.internal/api/puzzle/time-based`).
+
+3. When a puzzle with a handler URL is viewed, the app fetches content from that URL
+   instead of using the stored HTML. Responses are cached for `PUZZLE_CONTENT_CACHE_SECONDS`
+   (default 60) to reduce load.
+
+**Example handler** (simplified Python):
+```python
+@app.get("/api/puzzle/<name>")
+def dynamic_puzzle(name: str):
+    puzzle_id = request.args.get("puzzle_id")
+    team_id = request.args.get("team_id")
+    at = request.args.get("at")  # ISO timestamp
+    # Generate or fetch content based on time, team, etc.
+    return f"<p>Current time: {at}</p>..."
+```
+
+The handler URL is optional. Puzzles without a handler URL use the static HTML content
+stored in the admin UI.
+
 ## Layout
 
 ```

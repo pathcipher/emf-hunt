@@ -18,6 +18,13 @@ class PuzzleForm(FlaskForm):
     content_html = TextAreaField(
         "Puzzle HTML", validators=[Optional(), Length(max=100000)]
     )
+    handler_url = StringField(
+        "Handler URL (optional)",
+        validators=[Optional(), Length(max=500)],
+        render_kw={
+            "placeholder": "https://puzzles.internal/api/puzzle/time-based"
+        },
+    )
     answer = StringField("Answer", validators=[DataRequired(), Length(max=255)])
     is_published = BooleanField("Published")
     submit = SubmitField("Save puzzle")

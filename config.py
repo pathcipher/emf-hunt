@@ -52,3 +52,7 @@ class Config:
     # Rate-limit storage. memory:// is fine for a single-process camp deploy;
     # use redis:// if you run multiple workers.
     RATELIMIT_STORAGE_URI = os.environ.get("RATELIMIT_STORAGE_URI", "memory://")
+
+    # Dynamic puzzle content cache duration (seconds).
+    # Cache responses from handler URLs to reduce load on external services.
+    PUZZLE_CONTENT_CACHE_SECONDS = int(os.environ.get("PUZZLE_CONTENT_CACHE_SECONDS", "60"))

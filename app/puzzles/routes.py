@@ -12,6 +12,7 @@ from flask import (
 from flask_login import current_user, login_required
 from sqlalchemy.exc import IntegrityError
 
+from ..content import get_puzzle_content
 from ..extensions import db, limiter
 from ..models import Puzzle, Solve, Submission
 from ..progression import (
@@ -52,10 +53,18 @@ def view(order: int):
     if not can_access(team, puzzle):
         abort(403)  # future puzzle — locked
 
+    # Fetch dynamic content if handler_url is set; otherwise use stored content.
+    content_html = puzzle.content_html
+    if puzzle.handler_url:
+        dynamic_content = get_puzzle_content(puzzle.id, team.id, puzzle.handler_url)
+        if dynamic_content:
+            content_html = dynamic_content
+
     solved_ids = {solve.puzzle_id for solve in team.solves}
     return render_template(
         "puzzles/view.html",
         puzzle=puzzle,
+        content_html=content_html,
         form=AnswerForm(),
         already_solved=puzzle.id in solved_ids,
         total=len(published_puzzles()),

@@ -7,8 +7,9 @@
 <h1>{{ puzzle.title }}</h1>
 
 <article class="puzzle-body">
-  {# Trusted admin-authored content. May contain HTML & JS (e.g. Geolocation). #}
-  {{ puzzle.content_html | safe }}
+  {# Trusted admin-authored content. May contain HTML & JS (e.g. Geolocation).
+     May be dynamic (fetched from handler_url) or static (stored in DB). #}
+  {{ content_html | safe }}
 </article>
 
 {% if already_solved %}

@@ -68,6 +68,9 @@ class Puzzle(db.Model):
     content_html = db.Column(db.Text, nullable=False, default="")
     answer = db.Column(db.String(255), nullable=False, default="")
     is_published = db.Column(db.Boolean, default=False, nullable=False)
+    # Optional remote handler URL for dynamic puzzle content. If set, content is
+    # fetched from this URL instead of using stored content_html.
+    handler_url = db.Column(db.String(500), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
     updated_at = db.Column(
         db.DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False
