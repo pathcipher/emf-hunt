@@ -14,6 +14,46 @@ from config import Config
 from .extensions import csrf, db, limiter, login_manager
 
 
+def _reconcile_schema() -> None:
+    """Reconcile the database schema on startup.
+
+    Creates missing tables and adds missing columns to existing tables.
+    This ensures the schema is always up-to-date without requiring manual migrations.
+    """
+    logger = logging.getLogger("emf_hunt.schema")
+
+    # Create all tables defined in models (idempotent).
+    db.create_all()
+    logger.info("Database schema created/verified.")
+
+    # Check for missing columns and add them if needed.
+    from sqlalchemy import inspect, text
+
+    inspector = inspect(db.engine)
+    for table in db.metadata.tables.values():
+        table_name = table.name
+        if not inspector.has_table(table_name):
+            continue
+
+        existing_cols = {col["name"] for col in inspector.get_columns(table_name)}
+        model_cols = {col.name for col in table.columns}
+        missing = model_cols - existing_cols
+
+        for col_name in missing:
+            col = table.columns[col_name]
+            # Build ALTER TABLE statement
+            col_type = col.type.compile(db.engine)
+            nullable = "NOT NULL" if not col.nullable else ""
+            default = f"DEFAULT {col.default.arg}" if col.default else ""
+            alter_stmt = f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_type} {nullable} {default}"
+            try:
+                db.session.execute(text(alter_stmt))
+                logger.info(f"Added missing column {table_name}.{col_name}")
+            except Exception as e:
+                logger.warning(f"Failed to add column {table_name}.{col_name}: {e}")
+    db.session.commit()
+
+
 def create_app(config_object: type = Config) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config_object)
@@ -62,6 +102,10 @@ def create_app(config_object: type = Config) -> Flask:
     _register_security_headers(app)
     _register_error_handlers(app)
     _register_cli(app)
+
+    # Reconcile database schema on startup.
+    with app.app_context():
+        _reconcile_schema()
 
     return app
 
