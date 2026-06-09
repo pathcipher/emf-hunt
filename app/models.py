@@ -66,7 +66,9 @@ class Puzzle(db.Model):
     order_index = db.Column(db.Integer, unique=True, nullable=False, index=True)
     title = db.Column(db.String(160), nullable=False)
     content_html = db.Column(db.Text, nullable=False, default="")
-    answer = db.Column(db.String(255), nullable=False, default="")
+    # answer: JSON list of acceptable answers. Stored as JSON string.
+    # For backward compat, single string answers are auto-converted to a list.
+    answer = db.Column(db.Text, nullable=False, default="[]")
     is_published = db.Column(db.Boolean, default=False, nullable=False)
     # Optional remote handler URL for dynamic puzzle content. If set, content is
     # fetched from this URL instead of using stored content_html.
@@ -75,6 +77,29 @@ class Puzzle(db.Model):
     updated_at = db.Column(
         db.DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False
     )
+
+    def get_answers(self) -> list[str]:
+        """Return the list of acceptable answers for this puzzle.
+
+        Handles both JSON list format and legacy single-string format.
+        """
+        import json
+
+        if not self.answer:
+            return []
+        try:
+            # Try to parse as JSON list
+            parsed = json.loads(self.answer)
+            if isinstance(parsed, list):
+                return parsed
+            # If it's a single string (legacy), wrap it
+            if isinstance(parsed, str):
+                return [parsed]
+        except (json.JSONDecodeError, TypeError):
+            # Fallback: treat as a single legacy answer string
+            if isinstance(self.answer, str):
+                return [self.answer]
+        return []
 
 
 class Solve(db.Model):

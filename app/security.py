@@ -25,8 +25,25 @@ def normalize_answer(text: str) -> str:
     return _WHITESPACE.sub(" ", (text or "").strip()).lower()
 
 
-def answers_match(submitted: str, stored: str) -> bool:
-    return normalize_answer(submitted) == normalize_answer(stored)
+def answers_match(submitted: str, stored: str | list[str]) -> bool:
+    """Check if a submitted answer matches any of the stored answers.
+
+    Args:
+        submitted: Player's answer (will be normalized).
+        stored: One or more acceptable answers. Can be a single string or list of strings.
+
+    Returns:
+        True if the submitted answer matches any of the stored answers (after normalization).
+    """
+    normalized_submitted = normalize_answer(submitted)
+
+    # Handle both single string and list of strings
+    if isinstance(stored, str):
+        stored_list = [stored]
+    else:
+        stored_list = stored
+
+    return any(normalize_answer(ans) == normalized_submitted for ans in stored_list)
 
 
 def _hash_token(raw: str) -> str:

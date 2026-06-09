@@ -46,3 +46,33 @@ def test_cannot_submit_to_non_current_puzzle(client, login, two_puzzles):
     _make_team(client)
     # Puzzle 2 is not the current puzzle yet — submitting must be rejected.
     assert client.post("/puzzle/2/submit", data={"answer": "beta"}).status_code == 403
+
+
+def test_multiple_answers_all_accepted(client, app, login):
+    """Test that puzzles with multiple answers accept any of them."""
+    from app.extensions import db
+    from app.models import Puzzle, Submission
+
+    login("p1@example.com")
+    client.post("/team/create", data={"name": "Test"})
+
+    with app.app_context():
+        # Clear and add a multi-answer puzzle
+        Puzzle.query.delete()
+        db.session.add(
+            Puzzle(
+                order_index=1,
+                title="Multi",
+                content_html="<p>multi</p>",
+                answer='["hello", "hi", "hey"]',
+                is_published=True,
+            )
+        )
+        db.session.commit()
+
+    # Each answer should be accepted
+    for ans in ["hello", "hi", "hey"]:
+        client.post("/puzzle/1/submit", data={"answer": ans})
+        with app.app_context():
+            last = Submission.query.order_by(Submission.id.desc()).first()
+            assert last.is_correct, f"Answer '{ans}' should be correct"

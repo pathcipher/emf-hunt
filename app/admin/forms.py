@@ -1,3 +1,5 @@
+import json
+
 from flask_wtf import FlaskForm
 from wtforms import (
     BooleanField,
@@ -6,7 +8,29 @@ from wtforms import (
     SubmitField,
     TextAreaField,
 )
-from wtforms.validators import DataRequired, Length, NumberRange, Optional
+from wtforms.validators import DataRequired, Length, NumberRange, Optional, ValidationError
+
+
+def _validate_answer_json(form, field):
+    """Validate that the answer field is valid JSON (list or single string)."""
+    value = field.data.strip()
+    if not value:
+        raise ValidationError("Answer is required.")
+
+    try:
+        parsed = json.loads(value)
+        # Accept either a list of strings or a single string
+        if isinstance(parsed, list):
+            if not all(isinstance(ans, str) for ans in parsed):
+                raise ValidationError("All answers must be strings.")
+            if not parsed:
+                raise ValidationError("Answer list cannot be empty.")
+        elif not isinstance(parsed, str):
+            raise ValidationError("Answer must be a JSON string or list of strings.")
+    except json.JSONDecodeError:
+        # If it's not valid JSON, treat it as a single string answer (backward compat)
+        if not isinstance(value, str) or not value:
+            raise ValidationError("Answer must be a valid string or JSON list.")
 
 
 class PuzzleForm(FlaskForm):
@@ -25,6 +49,13 @@ class PuzzleForm(FlaskForm):
             "placeholder": "https://puzzles.internal/api/puzzle/time-based"
         },
     )
-    answer = StringField("Answer", validators=[DataRequired(), Length(max=255)])
+    answer = TextAreaField(
+        "Answer(s)",
+        validators=[DataRequired(), _validate_answer_json],
+        render_kw={
+            "rows": "4",
+            "placeholder": '["hello", "hi", "hey"]\nor\n"hello"',
+        },
+    )
     is_published = BooleanField("Published")
     submit = SubmitField("Save puzzle")

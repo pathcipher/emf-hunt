@@ -100,7 +100,7 @@ def submit(order: int):
         return redirect(url_for("puzzles.view", order=order))
 
     attempt = form.answer.data.strip()
-    correct = answers_match(attempt, puzzle.answer)
+    correct = answers_match(attempt, puzzle.get_answers())
 
     # Record every attempt (audit trail) — commit it independently.
     db.session.add(

@@ -31,9 +31,14 @@
   {% for e in form.handler_url.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
 
   <label for="answer">
-    Answer <span class="muted">— matched case- and space-insensitively</span>
+    Answer(s) <span class="muted">— JSON list or single string, matched case-insensitively</span>
   </label>
-  {{ form.answer(id="answer", maxlength="255", autocomplete="off") }}
+  {{ form.answer(id="answer", class="code", spellcheck="false") }}
+  <p class="muted" style="font-size: 0.85rem; margin-top: 0.3rem;">
+    One answer: <code>"hello"</code> or <code>["hello"]</code>
+    <br>Multiple answers: <code>["hello", "hi", "hey"]</code>
+    <br>Whitespace is normalized; case is ignored.
+  </p>
   {% for e in form.answer.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
 
   <label class="checkbox">{{ form.is_published() }} Published (visible to players)</label>
