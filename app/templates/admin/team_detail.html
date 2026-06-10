@@ -29,6 +29,30 @@
   </p>
 </div>
 
+<div class="card">
+  <p class="muted">Solved puzzles</p>
+  {% if solves %}
+    <ul class="reset-list">
+      {% for s in solves %}
+      <li class="reset-item">
+        <span class="reset-label">
+          {% if s.puzzle %}#{{ s.puzzle.order_index }} — {{ s.puzzle.title }}{% else %}(deleted puzzle){% endif %}
+        </span>
+        <span class="muted reset-time">{{ s.solved_at.strftime('%Y-%m-%d %H:%M') }}</span>
+        <form method="post"
+              action="{{ url_for('admin.team_reset_solve', team_id=team.id, puzzle_id=s.puzzle_id) }}"
+              onsubmit="return confirm('Reset this team\'s progress on this puzzle? They will need to solve it again. Attempt history is kept.');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="link-btn danger">Reset</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">No puzzles solved yet.</p>
+  {% endif %}
+</div>
+
 <h2>Members ({{ team.members|length }})</h2>
 <ul class="member-admin-list">
   {% for m in team.members %}

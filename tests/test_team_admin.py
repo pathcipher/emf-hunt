@@ -122,6 +122,37 @@ def test_regenerate_join_code(client, app, login):
     assert _get(app, Team, ids["alpha"]).join_code != old
 
 
+def test_reset_solve_relocks_puzzle_but_keeps_submissions(client, app, login):
+    login("boss@example.com")
+    ids = _setup(app)
+    from app.models import Puzzle, Solve, Submission
+
+    with app.app_context():
+        puzzle_id = Puzzle.query.filter_by(order_index=1).first().id
+
+    # Reset Alpha's solve on puzzle 1.
+    r = client.post(f"/admin/teams/{ids['alpha']}/puzzles/{puzzle_id}/reset", data={})
+    assert r.status_code == 302
+
+    with app.app_context():
+        # Solve is gone, but the attempt history remains.
+        assert Solve.query.filter_by(team_id=ids["alpha"], puzzle_id=puzzle_id).count() == 0
+        assert Submission.query.filter_by(team_id=ids["alpha"], puzzle_id=puzzle_id).count() == 1
+
+
+def test_reset_solve_requires_admin(client, app, login):
+    ids = _setup(app)  # creates teams/puzzle/solve
+    login("boss@example.com")  # first user = admin
+    client.post("/logout")
+    login("npc@example.com")  # not admin
+    from app.models import Puzzle
+
+    with app.app_context():
+        puzzle_id = Puzzle.query.filter_by(order_index=1).first().id
+    r = client.post(f"/admin/teams/{ids['alpha']}/puzzles/{puzzle_id}/reset", data={})
+    assert r.status_code == 403
+
+
 def test_delete_team_cleans_up(client, app, login):
     login("boss@example.com")
     ids = _setup(app)

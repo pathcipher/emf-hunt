@@ -19,7 +19,7 @@ from ..media import (
     list_puzzle_media,
     save_puzzle_media,
 )
-from ..models import Puzzle, Submission, Team, User, generate_join_code
+from ..models import Puzzle, Solve, Submission, Team, User, generate_join_code
 from ..progression import current_puzzle, published_puzzles
 from ..security import admin_required
 from .forms import MediaUploadForm, PuzzleForm
@@ -311,6 +311,10 @@ def team_detail(team_id: int):
     team = db.session.get(Team, team_id)
     if team is None:
         abort(404)
+    solves = sorted(
+        team.solves,
+        key=lambda s: s.puzzle.order_index if s.puzzle else 0,
+    )
     return render_template(
         "admin/team_detail.html",
         team=team,
@@ -318,6 +322,7 @@ def team_detail(team_id: int):
         current=current_puzzle(team),
         solved=len(team.solves),
         total=len(published_puzzles()),
+        solves=solves,
     )
 
 
@@ -354,6 +359,36 @@ def team_regen_code(team_id: int):
     db.session.commit()
     flash("New join code generated.", "success")
     return redirect(url_for("admin.team_detail", team_id=team.id))
+
+
+@bp.route("/teams/<int:team_id>/puzzles/<int:puzzle_id>/reset", methods=["POST"])
+@login_required
+@admin_required
+def team_reset_solve(team_id: int, puzzle_id: int):
+    """Un-solve one puzzle for a team by deleting its Solve row.
+
+    The submission/audit history is intentionally kept. Because the current
+    puzzle is the lowest published puzzle a team hasn't solved, resetting an
+    earlier puzzle re-opens it as the team's current puzzle.
+    """
+    team = db.session.get(Team, team_id)
+    if team is None:
+        abort(404)
+    solve = Solve.query.filter_by(team_id=team_id, puzzle_id=puzzle_id).first()
+    if solve is None:
+        flash("That puzzle isn't marked solved for this team.", "error")
+    else:
+        puzzle = db.session.get(Puzzle, puzzle_id)
+        label = (
+            f"#{puzzle.order_index} — {puzzle.title}" if puzzle else f"puzzle {puzzle_id}"
+        )
+        db.session.delete(solve)
+        db.session.commit()
+        flash(
+            f"Reset {team.name}'s progress on {label}. Their attempt history is kept.",
+            "success",
+        )
+    return redirect(url_for("admin.team_detail", team_id=team_id))
 
 
 @bp.route("/teams/<int:team_id>/delete", methods=["POST"])

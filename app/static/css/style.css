@@ -215,6 +215,12 @@ textarea.code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace
 .media-upload { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-top: 0.8rem; }
 .link-btn.danger { color: #ff8a8a; }
 
+/* Per-puzzle solve reset (team detail) */
+.reset-list { list-style: none; padding: 0; margin: 0.6rem 0 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.reset-item { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.reset-label { font-weight: 600; min-width: 0; flex: 1; }
+.reset-time { font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+
 /* Error page */
 .error-page { text-align: center; padding: 2rem 0; }
 .error-code { font-size: 3.5rem; font-weight: 800; color: var(--accent); margin: 0; }
