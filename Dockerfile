@@ -16,12 +16,19 @@ RUN pip install -r requirements.txt
 # Application code.
 COPY . .
 
-# Run as an unprivileged user; the instance/ dir holds the SQLite DB (mount a volume).
+# Run as an unprivileged user. instance/ holds the SQLite DB and media/ holds
+# admin-uploaded puzzle images — mount a volume at each (see docker-compose).
 RUN useradd --create-home --uid 10001 appuser \
     && chmod +x docker-entrypoint.sh \
-    && mkdir -p /app/instance \
+    && mkdir -p /app/instance /app/media \
     && chown -R appuser:appuser /app
 USER appuser
+
+# Default media location inside the container (override via env if desired).
+ENV MEDIA_ROOT=/app/media
+
+# Declared so the image documents its writable data dirs; compose binds named volumes.
+VOLUME ["/app/instance", "/app/media"]
 
 EXPOSE 8000
 

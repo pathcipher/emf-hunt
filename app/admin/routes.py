@@ -14,10 +14,15 @@ from flask import (
 from flask_login import login_required
 
 from ..extensions import db
+from ..media import (
+    delete_puzzle_media,
+    list_puzzle_media,
+    save_puzzle_media,
+)
 from ..models import Puzzle, Submission, Team, User, generate_join_code
 from ..progression import current_puzzle, published_puzzles
 from ..security import admin_required
-from .forms import PuzzleForm
+from .forms import MediaUploadForm, PuzzleForm
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -97,8 +102,61 @@ def puzzle_edit(puzzle_id: int):
             flash("Puzzle saved.", "success")
             return redirect(url_for("admin.puzzles"))
     return render_template(
-        "admin/puzzle_form.html", form=form, mode="edit", puzzle=puzzle
+        "admin/puzzle_form.html",
+        form=form,
+        mode="edit",
+        puzzle=puzzle,
+        media_form=MediaUploadForm(),
+        media_files=list_puzzle_media(puzzle.id),
     )
+
+
+@bp.route("/puzzles/<int:puzzle_id>/media", methods=["POST"])
+@login_required
+@admin_required
+def puzzle_media_upload(puzzle_id: int):
+    puzzle = db.session.get(Puzzle, puzzle_id)
+    if puzzle is None:
+        abort(404)
+
+    form = MediaUploadForm()
+    if not form.validate_on_submit():
+        flash("Upload failed (invalid request).", "error")
+        return redirect(url_for("admin.puzzle_edit", puzzle_id=puzzle_id))
+
+    saved, errors = 0, []
+    for file in form.files.data or []:
+        if not file or not file.filename:
+            continue
+        name, error = save_puzzle_media(puzzle_id, file)
+        if error:
+            errors.append(error)
+        else:
+            saved += 1
+
+    if saved:
+        flash(f"Uploaded {saved} image{'s' if saved != 1 else ''}.", "success")
+    for error in errors:
+        flash(error, "error")
+    if not saved and not errors:
+        flash("No files selected.", "error")
+    return redirect(url_for("admin.puzzle_edit", puzzle_id=puzzle_id))
+
+
+@bp.route("/puzzles/<int:puzzle_id>/media/delete", methods=["POST"])
+@login_required
+@admin_required
+def puzzle_media_delete(puzzle_id: int):
+    puzzle = db.session.get(Puzzle, puzzle_id)
+    if puzzle is None:
+        abort(404)
+    # CSRF is enforced by Flask-WTF on this POST via the hidden token in the form.
+    filename = (request.form.get("filename") or "").strip()
+    if delete_puzzle_media(puzzle_id, filename):
+        flash(f"Deleted “{filename}”.", "success")
+    else:
+        flash("Could not delete that file.", "error")
+    return redirect(url_for("admin.puzzle_edit", puzzle_id=puzzle_id))
 
 
 @bp.route("/progress")

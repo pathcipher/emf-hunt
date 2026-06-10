@@ -11,12 +11,13 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 
-# Never bake secrets or the local database into the image.
+# Never bake secrets, the local database, or uploaded media into the image.
 .env
 *.db
 *.sqlite
 *.sqlite3
 instance/
+media/
 
 .DS_Store
 *.swp

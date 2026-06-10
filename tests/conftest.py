@@ -1,4 +1,5 @@
 import os
+import shutil
 import tempfile
 
 import pytest
@@ -23,6 +24,10 @@ def app():
     os.close(fd)
     TestConfig.SQLALCHEMY_DATABASE_URI = f"sqlite:///{path}"
 
+    # Isolate uploaded media per test run.
+    media_dir = tempfile.mkdtemp(prefix="emf-media-")
+    TestConfig.MEDIA_ROOT = media_dir
+
     application = create_app(TestConfig)
     with application.app_context():
         _db.create_all()
@@ -33,6 +38,7 @@ def app():
         _db.session.remove()
         _db.drop_all()
     os.unlink(path)
+    shutil.rmtree(media_dir, ignore_errors=True)
 
 
 @pytest.fixture

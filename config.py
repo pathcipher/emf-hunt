@@ -56,3 +56,17 @@ class Config:
     # Dynamic puzzle content cache duration (seconds).
     # Cache responses from handler URLs to reduce load on external services.
     PUZZLE_CONTENT_CACHE_SECONDS = int(os.environ.get("PUZZLE_CONTENT_CACHE_SECONDS", "60"))
+
+    # Puzzle media (admin-uploaded images). Stored on disk, NOT in the repo or DB.
+    # Defaults to a top-level media/ dir in dev; in Docker, point MEDIA_ROOT at a
+    # mounted volume (e.g. /app/media). Served per-puzzle behind the same access
+    # control as the puzzle itself.
+    MEDIA_ROOT = os.environ.get("MEDIA_ROOT") or os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "media"
+    )
+    # Image types admins may upload. Note: SVG can carry inline script — that's
+    # within the existing trust boundary (only admins upload), consistent with
+    # admin-authored puzzle HTML/JS.
+    MEDIA_ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "svg"}
+    # Cap request bodies (applies to uploads too). Override with MAX_UPLOAD_MB.
+    MAX_CONTENT_LENGTH = int(os.environ.get("MAX_UPLOAD_MB", "16")) * 1024 * 1024

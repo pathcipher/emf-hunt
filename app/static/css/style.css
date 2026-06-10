@@ -197,6 +197,24 @@ textarea.code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace
 .order-badge { color: var(--muted); font-variant-numeric: tabular-nums; }
 .crew { word-break: break-word; }
 
+/* Puzzle media manager */
+.media-manager { margin-top: 1.2rem; }
+.media-manager h2 { margin-top: 0; }
+.media-list { list-style: none; padding: 0; margin: 1rem 0; display: flex; flex-direction: column; gap: 0.8rem; }
+.media-item {
+  display: flex; align-items: center; gap: 0.8rem;
+  padding: 0.6rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
+}
+.media-thumb {
+  width: 56px; height: 56px; object-fit: cover; border-radius: 8px;
+  background: rgba(255,255,255,0.04); flex: none;
+}
+.media-meta { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; flex: 1; }
+.media-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.media-snippet { width: 100%; font-size: 0.8rem; padding: 0.3rem 0.4rem; }
+.media-upload { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-top: 0.8rem; }
+.link-btn.danger { color: #ff8a8a; }
+
 /* Error page */
 .error-page { text-align: center; padding: 2rem 0; }
 .error-code { font-size: 3.5rem; font-weight: 800; color: var(--accent); margin: 0; }

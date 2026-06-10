@@ -153,6 +153,20 @@ def dynamic_puzzle(name: str):
 The handler URL is optional. Puzzles without a handler URL use the static HTML content
 stored in the admin UI.
 
+## Puzzle images
+
+Admins upload images per-puzzle from the puzzle edit page. They are stored on disk under
+`MEDIA_ROOT` (not in the repo or the database) and served behind the **same access control
+as the puzzle** — a team can only fetch an image for a puzzle it can already reach, so
+images can't leak puzzles a team hasn't unlocked.
+
+- **Multiple files** per upload; re-uploading a file with the **same name overwrites** it.
+- Allowed types: png, jpg/jpeg, gif, webp, svg. Max size: `MAX_UPLOAD_MB` (default 16).
+- Reference an image in the puzzle HTML with the snippet shown next to it, e.g.
+  `<img src="/media/puzzle/3/diagram.png" alt="">`.
+- In Docker, `MEDIA_ROOT` is a named volume (`/app/media`) so images survive restarts;
+  locally it defaults to `./media` (gitignored).
+
 ## Layout
 
 ```
@@ -162,6 +176,8 @@ app/
   models.py       User, Team, Puzzle, Solve, Submission, LoginToken
   security.py     magic tokens, answer normalization, admin_required
   email.py        pluggable email backends (console | ses | api)
+  content.py      dynamic puzzle content (remote handler URLs)
+  media.py        per-puzzle image storage (upload / list / delete)
   auth/  teams/  puzzles/  admin/    blueprints
   templates/  static/
 config.py         env-driven configuration

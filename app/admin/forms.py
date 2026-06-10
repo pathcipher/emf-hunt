@@ -4,6 +4,7 @@ from flask_wtf import FlaskForm
 from wtforms import (
     BooleanField,
     IntegerField,
+    MultipleFileField,
     StringField,
     SubmitField,
     TextAreaField,
@@ -59,3 +60,10 @@ class PuzzleForm(FlaskForm):
     )
     is_published = BooleanField("Published")
     submit = SubmitField("Save puzzle")
+
+
+class MediaUploadForm(FlaskForm):
+    # Per-file validation (extension allowlist) happens in the route via
+    # app.media.save_puzzle_media; this form just carries the files + CSRF token.
+    files = MultipleFileField("Images")
+    submit = SubmitField("Upload images")

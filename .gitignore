@@ -19,6 +19,9 @@ env/
 *.sqlite3
 instance/
 
+# Uploaded puzzle images — runtime data, may reveal puzzle content. Never commit.
+media/
+
 # OS / editor cruft
 .DS_Store
 *.swp

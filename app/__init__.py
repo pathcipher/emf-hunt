@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import logging
+import os
 
 from flask import Flask, render_template
 
@@ -59,6 +60,9 @@ def create_app(config_object: type = Config) -> Flask:
     app.config.from_object(config_object)
 
     logging.basicConfig(level=logging.INFO)
+
+    # Ensure the puzzle-media directory exists (mounted volume in Docker).
+    os.makedirs(app.config["MEDIA_ROOT"], exist_ok=True)
 
     db.init_app(app)
     csrf.init_app(app)

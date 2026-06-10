@@ -9,6 +9,8 @@ services:
     environment:
       # Keep the SQLite DB on the mounted volume so it survives restarts.
       DATABASE_URL: "sqlite:////app/instance/emf_hunt.db"
+      # Puzzle images live on their own volume (kept out of the repo and DB).
+      MEDIA_ROOT: "/app/media"
       # How the app is reached when running locally via compose (used in magic links).
       BASE_URL: "http://localhost:8000"
       # Behind an HTTPS-terminating proxy in production, set this true.
@@ -17,7 +19,9 @@ services:
       SEED_DEMO: "0"
     volumes:
       - hunt-data:/app/instance
+      - hunt-media:/app/media
     restart: unless-stopped
 
 volumes:
   hunt-data:
+  hunt-media:

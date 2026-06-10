@@ -48,4 +48,49 @@
     <a class="btn btn-secondary" href="{{ url_for('admin.puzzles') }}">Cancel</a>
   </div>
 </form>
+
+{% if mode == 'edit' %}
+<section class="card media-manager">
+  <h2>Images</h2>
+  <p class="muted">
+    Uploaded images are served only to teams that can reach this puzzle — same
+    access rules as the puzzle itself. Reference one in the HTML above using its
+    snippet below. Re-uploading a file with the same name overwrites it.
+  </p>
+
+  {% if media_files %}
+    <ul class="media-list">
+      {% for f in media_files %}
+        {% set src = url_for('puzzles.media', puzzle_id=puzzle.id, filename=f) %}
+        <li class="media-item">
+          <img class="media-thumb" src="{{ src }}" alt="{{ f }}">
+          <div class="media-meta">
+            <span class="media-name">{{ f }}</span>
+            <input class="media-snippet code" type="text" readonly
+                   onclick="this.select()"
+                   value='<img src="{{ src }}" alt="">'>
+          </div>
+          <form method="post"
+                action="{{ url_for('admin.puzzle_media_delete', puzzle_id=puzzle.id) }}"
+                onsubmit="return confirm('Delete {{ f }}?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="filename" value="{{ f }}">
+            <button type="submit" class="link-btn danger">Delete</button>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted">No images uploaded yet.</p>
+  {% endif %}
+
+  <form method="post"
+        action="{{ url_for('admin.puzzle_media_upload', puzzle_id=puzzle.id) }}"
+        enctype="multipart/form-data" class="media-upload">
+    {{ media_form.hidden_tag() }}
+    {{ media_form.files(multiple=true, accept="image/*") }}
+    {{ media_form.submit(class="btn btn-secondary") }}
+  </form>
+</section>
+{% endif %}
 {% endblock %}

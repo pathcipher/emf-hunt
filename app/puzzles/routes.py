@@ -7,6 +7,7 @@ from flask import (
     flash,
     redirect,
     render_template,
+    send_from_directory,
     url_for,
 )
 from flask_login import current_user, login_required
@@ -14,6 +15,7 @@ from sqlalchemy.exc import IntegrityError
 
 from ..content import get_puzzle_content
 from ..extensions import db, limiter
+from ..media import puzzle_media_dir
 from ..models import Puzzle, Solve, Submission
 from ..progression import (
     can_access,
@@ -70,6 +72,26 @@ def view(order: int):
         total=len(published_puzzles()),
         solved_count=len(solved_ids),
     )
+
+
+@bp.route("/media/puzzle/<int:puzzle_id>/<path:filename>")
+@login_required
+def media(puzzle_id: int, filename: str):
+    """Serve a puzzle's uploaded image, gated like the puzzle itself.
+
+    A team can only fetch media for a puzzle it may already reach (solved or
+    current). Admins may always fetch, so they can preview while authoring.
+    """
+    puzzle = db.session.get(Puzzle, puzzle_id)
+    if puzzle is None:
+        abort(404)
+
+    team = current_user.team if current_user.team_id else None
+    if not current_user.is_admin and not can_access(team, puzzle):
+        abort(403)
+
+    # send_from_directory safe-joins, so `filename` can't traverse out.
+    return send_from_directory(puzzle_media_dir(puzzle_id), filename)
 
 
 def _answer_rate_key() -> str:
