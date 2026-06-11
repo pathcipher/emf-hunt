@@ -3,6 +3,7 @@ import json
 from flask_wtf import FlaskForm
 from wtforms import (
     BooleanField,
+    FileField,
     IntegerField,
     MultipleFileField,
     StringField,
@@ -76,3 +77,9 @@ class SuccessPageForm(FlaskForm):
         "Success page HTML", validators=[Optional(), Length(max=100000)]
     )
     submit = SubmitField("Save success page")
+
+
+class BrandingUploadForm(FlaskForm):
+    # Extension validation happens in the route via app.branding.save_branding.
+    file = FileField("File")
+    submit = SubmitField("Upload")

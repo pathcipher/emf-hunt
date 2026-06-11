@@ -167,6 +167,13 @@ images can't leak puzzles a team hasn't unlocked.
 - In Docker, `MEDIA_ROOT` is a named volume (`/app/media`) so images survive restarts;
   locally it defaults to `./media` (gitignored).
 
+## Branding (favicon + logo)
+
+Admins set a site **favicon** and **logo** from **Admin → Branding**. These are public
+(shown on the login page too), stored on the media volume under `MEDIA_ROOT/branding/`,
+with the current filename tracked in the settings table. Uploading replaces the previous
+file; the logo falls back to the `✦` mark and the favicon to none when unset.
+
 ## Layout
 
 ```
@@ -179,6 +186,7 @@ app/
   content.py      dynamic puzzle content (remote handler URLs)
   media.py        per-puzzle image storage (upload / list / delete)
   settings.py     admin-editable key/value content (e.g. success page)
+  branding.py     customisable favicon + logo (public, on the media volume)
   auth/  teams/  puzzles/  admin/    blueprints
   templates/  static/
 config.py         env-driven configuration

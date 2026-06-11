@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Branding · Admin{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin.dashboard') }}">← Mission Control</a></p>
+<h1>Branding</h1>
+<p class="muted">
+  Set the site favicon and logo. These are public (shown on the login page too).
+  Uploading replaces the current file. Changes appear on the next page load.
+</p>
+
+<section class="card">
+  <h2>Favicon</h2>
+  <p class="muted">Shown in the browser tab. Allowed: .ico, .png, .svg, .webp.</p>
+  {% if favicon %}
+    <p class="brand-preview">
+      <img src="{{ url_for('branding.serve', kind='favicon') }}" alt="favicon" class="favicon-preview">
+      <span class="muted">{{ favicon }}</span>
+    </p>
+    <form method="post" action="{{ url_for('admin.branding_delete', kind='favicon') }}"
+          onsubmit="return confirm('Remove the favicon?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="link-btn danger">Remove favicon</button>
+    </form>
+  {% else %}
+    <p class="muted">No favicon set — using none.</p>
+  {% endif %}
+  <form method="post" action="{{ url_for('admin.branding_upload', kind='favicon') }}"
+        enctype="multipart/form-data" class="media-upload">
+    {{ form.hidden_tag() }}
+    {{ form.file(id="favicon_file", accept=".ico,.png,.svg,.webp,image/*") }}
+    <button type="submit" class="btn btn-secondary">Upload favicon</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Logo</h2>
+  <p class="muted">Shown in the top bar beside the site name. Allowed: .png, .jpg, .svg, .webp, .gif.</p>
+  {% if logo %}
+    <p class="brand-preview">
+      <img src="{{ url_for('branding.serve', kind='logo') }}" alt="logo" class="logo-preview">
+      <span class="muted">{{ logo }}</span>
+    </p>
+    <form method="post" action="{{ url_for('admin.branding_delete', kind='logo') }}"
+          onsubmit="return confirm('Remove the logo?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="link-btn danger">Remove logo</button>
+    </form>
+  {% else %}
+    <p class="muted">No logo set — using the ✦ mark.</p>
+  {% endif %}
+  <form method="post" action="{{ url_for('admin.branding_upload', kind='logo') }}"
+        enctype="multipart/form-data" class="media-upload">
+    {{ form.hidden_tag() }}
+    {{ form.file(id="logo_file", accept=".png,.jpg,.jpeg,.svg,.webp,.gif,image/*") }}
+    <button type="submit" class="btn btn-secondary">Upload logo</button>
+  </form>
+</section>
+{% endblock %}

@@ -66,8 +66,9 @@ body {
   border-bottom: 1px solid var(--card-border);
 }
 .nav { display: flex; align-items: center; justify-content: space-between; min-height: 56px; gap: 1rem; }
-.brand { font-weight: 700; letter-spacing: 0.02em; color: var(--text); text-decoration: none; white-space: nowrap; }
+.brand { font-weight: 700; letter-spacing: 0.02em; color: var(--text); text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.45rem; }
 .brand-mark { color: var(--accent); }
+.brand-logo { height: 28px; width: auto; vertical-align: middle; display: block; }
 .nav-links { display: flex; align-items: center; gap: 0.9rem; }
 .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.95rem; }
 .nav-links a:hover { color: var(--text); }
@@ -210,6 +211,11 @@ textarea.code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace
 }
 .answer-list { margin: 0.3rem 0 0.8rem; }
 .success-page { text-align: center; }
+
+/* Branding previews (admin) */
+.brand-preview { display: flex; align-items: center; gap: 0.7rem; }
+.favicon-preview { width: 32px; height: 32px; object-fit: contain; image-rendering: auto; }
+.logo-preview { height: 40px; width: auto; max-width: 220px; object-fit: contain; }
 .crew { word-break: break-word; }
 
 /* Puzzle media manager */

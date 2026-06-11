@@ -19,6 +19,12 @@ from ..media import (
     list_puzzle_media,
     save_puzzle_media,
 )
+from ..branding import (
+    KINDS as BRANDING_KINDS,
+    delete_branding,
+    get_branding_filename,
+    save_branding,
+)
 from ..content import get_puzzle_content
 from ..models import Puzzle, Solve, Submission, Team, User, generate_join_code
 from ..progression import current_puzzle, published_puzzles
@@ -29,7 +35,7 @@ from ..settings import (
     get_setting,
     set_setting,
 )
-from .forms import MediaUploadForm, PuzzleForm, SuccessPageForm
+from .forms import BrandingUploadForm, MediaUploadForm, PuzzleForm, SuccessPageForm
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -214,6 +220,47 @@ def success_page():
         form=form,
         preview_html=effective.replace("{{team_name}}", "The Cartographers"),
     )
+
+
+@bp.route("/branding")
+@login_required
+@admin_required
+def branding():
+    return render_template(
+        "admin/branding.html",
+        form=BrandingUploadForm(),
+        favicon=get_branding_filename("favicon"),
+        logo=get_branding_filename("logo"),
+    )
+
+
+@bp.route("/branding/<kind>", methods=["POST"])
+@login_required
+@admin_required
+def branding_upload(kind: str):
+    if kind not in BRANDING_KINDS:
+        abort(404)
+    form = BrandingUploadForm()
+    if not form.validate_on_submit() or not form.file.data or not form.file.data.filename:
+        flash("Choose a file to upload.", "error")
+        return redirect(url_for("admin.branding"))
+    _name, error = save_branding(kind, form.file.data)
+    if error:
+        flash(error, "error")
+    else:
+        flash(f"{kind.capitalize()} updated.", "success")
+    return redirect(url_for("admin.branding"))
+
+
+@bp.route("/branding/<kind>/delete", methods=["POST"])
+@login_required
+@admin_required
+def branding_delete(kind: str):
+    if kind not in BRANDING_KINDS:
+        abort(404)
+    delete_branding(kind)
+    flash(f"{kind.capitalize()} removed.", "success")
+    return redirect(url_for("admin.branding"))
 
 
 @bp.route("/progress")

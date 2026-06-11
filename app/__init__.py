@@ -80,6 +80,7 @@ def create_app(config_object: type = Config) -> Flask:
 
     from .admin.routes import bp as admin_bp
     from .auth.routes import bp as auth_bp
+    from .branding import bp as branding_bp
     from .puzzles.routes import bp as puzzles_bp
     from .teams.routes import bp as teams_bp
 
@@ -87,6 +88,7 @@ def create_app(config_object: type = Config) -> Flask:
     app.register_blueprint(teams_bp)
     app.register_blueprint(puzzles_bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(branding_bp)
 
     @app.get("/healthz")
     def healthz():
