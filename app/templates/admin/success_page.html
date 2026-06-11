@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Success page · Admin{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin.dashboard') }}">← Mission Control</a></p>
+<h1>Success page</h1>
+<p class="muted">
+  Shown to a team once they’ve solved every published puzzle. Leave blank to use
+  the built-in default. HTML &amp; JS are allowed (trusted authoring). Use
+  <code>{{ '{{team_name}}' }}</code> to drop in the team’s name (safely escaped).
+</p>
+
+<form method="post" class="card">
+  {{ form.hidden_tag() }}
+  <label for="content_html">Success page HTML</label>
+  {{ form.content_html(id="content_html", rows="12", class="code", spellcheck="false",
+                       placeholder="<h1>🚀 You did it!</h1>") }}
+  {% for e in form.content_html.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+  <div class="form-actions">
+    {{ form.submit(class="btn") }}
+  </div>
+</form>
+
+<h2>Preview</h2>
+<article class="puzzle-body success-page card">
+  {# Trusted admin-authored HTML; sample team name shown for the preview. #}
+  {{ preview_html | safe }}
+</article>
+{% endblock %}

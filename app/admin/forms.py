@@ -67,3 +67,12 @@ class MediaUploadForm(FlaskForm):
     # app.media.save_puzzle_media; this form just carries the files + CSRF token.
     files = MultipleFileField("Images")
     submit = SubmitField("Upload images")
+
+
+class SuccessPageForm(FlaskForm):
+    # Trusted, admin-authored HTML for the "you finished" page. Leave blank to
+    # fall back to the built-in default. Supports a {{team_name}} placeholder.
+    content_html = TextAreaField(
+        "Success page HTML", validators=[Optional(), Length(max=100000)]
+    )
+    submit = SubmitField("Save success page")

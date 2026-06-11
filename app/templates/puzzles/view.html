@@ -1,8 +1,14 @@
 {% extends "base.html" %}
 {% block title %}{{ puzzle.title }} · {{ site_name }}{% endblock %}
 {% block content %}
+{% if preview %}
+<div class="preview-banner">
+  👁 Admin preview — players see this once the puzzle is published and reachable.
+  Nothing here is recorded.
+</div>
+{% endif %}
 <div class="progress-pill">
-  Puzzle {{ puzzle.order_index }}{% if total %} · {{ solved_count }}/{{ total }} solved{% endif %}
+  Puzzle {{ puzzle.order_index }}{% if preview %} · Preview{% elif total %} · {{ solved_count }}/{{ total }} solved{% endif %}
 </div>
 <h1>{{ puzzle.title }}</h1>
 
@@ -12,7 +18,19 @@
   {{ content_html | safe }}
 </article>
 
-{% if already_solved %}
+{% if preview %}
+  <div class="card">
+    <p class="muted">Accepted answer{{ '' if answers|length == 1 else 's' }} (admin-only):</p>
+    {% if answers %}
+      <ul class="answer-list">
+        {% for a in answers %}<li><code>{{ a }}</code></li>{% endfor %}
+      </ul>
+    {% else %}
+      <p class="field-error">No answer set for this puzzle yet.</p>
+    {% endif %}
+    <p><a class="btn btn-secondary" href="{{ url_for('admin.puzzle_edit', puzzle_id=puzzle.id) }}">← Back to edit</a></p>
+  </div>
+{% elif already_solved %}
   <p class="solved-note">✓ Your team already solved this one.</p>
   <p><a class="btn" href="{{ url_for('puzzles.index') }}">Back to current puzzle →</a></p>
 {% else %}

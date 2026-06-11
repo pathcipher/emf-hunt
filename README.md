@@ -178,6 +178,7 @@ app/
   email.py        pluggable email backends (console | ses | api)
   content.py      dynamic puzzle content (remote handler URLs)
   media.py        per-puzzle image storage (upload / list / delete)
+  settings.py     admin-editable key/value content (e.g. success page)
   auth/  teams/  puzzles/  admin/    blueprints
   templates/  static/
 config.py         env-driven configuration

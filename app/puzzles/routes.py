@@ -11,6 +11,7 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required
+from markupsafe import escape
 from sqlalchemy.exc import IntegrityError
 
 from ..content import get_puzzle_content
@@ -24,6 +25,7 @@ from ..progression import (
     published_puzzles,
 )
 from ..security import answers_match
+from ..settings import DEFAULT_SUCCESS_HTML, SUCCESS_HTML, get_setting
 from .forms import AnswerForm
 
 bp = Blueprint("puzzles", __name__)
@@ -39,9 +41,24 @@ def index():
     puzzle = current_puzzle(team)
     if puzzle is None:
         if has_finished(team):
-            return render_template("puzzles/finished.html", team=team)
+            return render_template(
+                "puzzles/finished.html",
+                team=team,
+                success_html=render_success_html(team),
+            )
         return render_template("puzzles/none.html")
     return redirect(url_for("puzzles.view", order=puzzle.order_index))
+
+
+def render_success_html(team) -> str:
+    """The admin-customised success page, with a safely-escaped team-name token.
+
+    The HTML is trusted (admin-authored). The only untrusted value is the team
+    name, so it is HTML-escaped before being substituted into the {{team_name}}
+    placeholder — never injected raw into the |safe blob.
+    """
+    raw = get_setting(SUCCESS_HTML, "") or DEFAULT_SUCCESS_HTML
+    return raw.replace("{{team_name}}", str(escape(team.name)))
 
 
 @bp.route("/puzzle/<int:order>")

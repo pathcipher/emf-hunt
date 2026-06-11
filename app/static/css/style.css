@@ -200,6 +200,16 @@ textarea.code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace
 .progress-list li.card { flex-direction: column; align-items: stretch; }
 .progress-list .admin-list-row { align-items: flex-start; }
 .progress-list .admin-list-title { white-space: normal; overflow: visible; text-overflow: clip; word-break: break-word; }
+.row-links { display: inline-flex; gap: 0.9rem; }
+
+/* Admin puzzle preview */
+.preview-banner {
+  border: 1px solid var(--accent); border-radius: 10px;
+  background: rgba(106, 215, 255, 0.08); color: var(--accent);
+  padding: 0.6rem 0.8rem; margin-bottom: 1rem; font-size: 0.9rem;
+}
+.answer-list { margin: 0.3rem 0 0.8rem; }
+.success-page { text-align: center; }
 .crew { word-break: break-word; }
 
 /* Puzzle media manager */

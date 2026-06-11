@@ -16,7 +16,10 @@
         <span class="badge">draft</span>
       {% endif %}
     </div>
-    <a href="{{ url_for('admin.puzzle_edit', puzzle_id=p.id) }}">Edit →</a>
+    <span class="row-links">
+      <a href="{{ url_for('admin.puzzle_edit', puzzle_id=p.id) }}">Edit →</a>
+      <a href="{{ url_for('admin.puzzle_preview', puzzle_id=p.id) }}" target="_blank" rel="noopener">Preview ↗</a>
+    </span>
   </li>
   {% else %}
   <li class="muted">No puzzles yet. Create the first one.</li>

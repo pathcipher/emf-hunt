@@ -19,10 +19,17 @@ from ..media import (
     list_puzzle_media,
     save_puzzle_media,
 )
+from ..content import get_puzzle_content
 from ..models import Puzzle, Solve, Submission, Team, User, generate_join_code
 from ..progression import current_puzzle, published_puzzles
 from ..security import admin_required
-from .forms import MediaUploadForm, PuzzleForm
+from ..settings import (
+    DEFAULT_SUCCESS_HTML,
+    SUCCESS_HTML,
+    get_setting,
+    set_setting,
+)
+from .forms import MediaUploadForm, PuzzleForm, SuccessPageForm
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -157,6 +164,56 @@ def puzzle_media_delete(puzzle_id: int):
     else:
         flash("Could not delete that file.", "error")
     return redirect(url_for("admin.puzzle_edit", puzzle_id=puzzle_id))
+
+
+@bp.route("/puzzles/<int:puzzle_id>/preview")
+@login_required
+@admin_required
+def puzzle_preview(puzzle_id: int):
+    """Render a puzzle exactly as players see it, bypassing the progression lock.
+
+    Read-only: no answer form, the accepted answers are shown instead, and
+    nothing is recorded. Works for unpublished or future puzzles.
+    """
+    puzzle = db.session.get(Puzzle, puzzle_id)
+    if puzzle is None:
+        abort(404)
+
+    content_html = puzzle.content_html
+    if puzzle.handler_url:
+        # Faithful preview of dynamic content; team_id 0 if the admin has no team.
+        dynamic = get_puzzle_content(puzzle.id, current_user.team_id or 0, puzzle.handler_url)
+        if dynamic:
+            content_html = dynamic
+
+    return render_template(
+        "puzzles/view.html",
+        puzzle=puzzle,
+        content_html=content_html,
+        preview=True,
+        answers=puzzle.get_answers(),
+    )
+
+
+@bp.route("/success-page", methods=["GET", "POST"])
+@login_required
+@admin_required
+def success_page():
+    """Edit the HTML shown to a team that has finished every puzzle."""
+    form = SuccessPageForm()
+    if form.validate_on_submit():
+        set_setting(SUCCESS_HTML, form.content_html.data or "")
+        flash("Success page saved.", "success")
+        return redirect(url_for("admin.success_page"))
+    if request.method == "GET":
+        form.content_html.data = get_setting(SUCCESS_HTML, "")
+
+    effective = (form.content_html.data or "").strip() or DEFAULT_SUCCESS_HTML
+    return render_template(
+        "admin/success_page.html",
+        form=form,
+        preview_html=effective.replace("{{team_name}}", "The Cartographers"),
+    )
 
 
 @bp.route("/progress")

@@ -45,6 +45,10 @@
 
   <div class="form-actions">
     {{ form.submit(class="btn") }}
+    {% if mode == 'edit' %}
+      <a class="btn btn-secondary" href="{{ url_for('admin.puzzle_preview', puzzle_id=puzzle.id) }}"
+         target="_blank" rel="noopener">Preview ↗</a>
+    {% endif %}
     <a class="btn btn-secondary" href="{{ url_for('admin.puzzles') }}">Cancel</a>
   </div>
 </form>

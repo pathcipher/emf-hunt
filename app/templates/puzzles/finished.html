@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% block title %}You finished! · {{ site_name }}{% endblock %}
 {% block content %}
-<h1>🚀 You did it, {{ team.name }}!</h1>
-<p>Your team has solved every puzzle in the hunt. Stellar work.</p>
+<article class="puzzle-body success-page">
+  {# Trusted admin-authored HTML. The team name is escaped before substitution. #}
+  {{ success_html | safe }}
+</article>
 <p><a class="btn btn-secondary" href="{{ url_for('teams.view') }}">Back to your team</a></p>
 {% endblock %}

@@ -138,6 +138,18 @@ class Submission(db.Model):
     puzzle = db.relationship("Puzzle")
 
 
+class Setting(db.Model):
+    """Simple key/value store for admin-editable site content (e.g. the success page)."""
+
+    __tablename__ = "settings"
+
+    key = db.Column(db.String(80), primary_key=True)
+    value = db.Column(db.Text, nullable=False, default="")
+    updated_at = db.Column(
+        db.DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False
+    )
+
+
 class LoginToken(db.Model):
     """Single-use, expiring magic-link token. Only the hash is stored."""
 
