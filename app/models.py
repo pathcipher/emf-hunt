@@ -150,6 +150,19 @@ class Setting(db.Model):
     )
 
 
+class Suppression(db.Model):
+    """An email we must stop sending to (SES complaint or permanent bounce).
+
+    Keyed on the lowercased address so the login flow can cheaply skip sending.
+    """
+
+    __tablename__ = "suppressions"
+
+    email = db.Column(db.String(255), primary_key=True)
+    reason = db.Column(db.String(40), nullable=False, default="")  # complaint | bounce
+    created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
+
+
 class LoginToken(db.Model):
     """Single-use, expiring magic-link token. Only the hash is stored."""
 

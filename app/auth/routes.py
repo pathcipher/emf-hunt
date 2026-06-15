@@ -15,10 +15,12 @@ from flask import (
 from flask_limiter.util import get_remote_address
 from flask_login import current_user, login_required, login_user, logout_user
 
+from ..captcha import verify_turnstile
 from ..email import send_magic_link
 from ..extensions import db, limiter
 from ..models import User
 from ..security import consume_login_token, create_login_token
+from ..suppression import is_suppressed
 from .forms import LoginForm
 
 bp = Blueprint("auth", __name__)
@@ -43,16 +45,31 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
+        if not verify_turnstile(request.form.get("cf-turnstile-response")):
+            flash("Please complete the verification and try again.", "error")
+            return _render_login(form)
+
         email = form.email.data.strip().lower()
-        raw = create_login_token(email)
-        link = urljoin(
-            current_app.config["BASE_URL"], url_for("auth.verify", token=raw)
-        )
-        send_magic_link(email, link)
+        # Don't email addresses that complained or hard-bounced (protects SES
+        # reputation), but respond identically so suppression isn't observable.
+        if not is_suppressed(email):
+            raw = create_login_token(email)
+            link = urljoin(
+                current_app.config["BASE_URL"], url_for("auth.verify", token=raw)
+            )
+            send_magic_link(email, link)
         # Always the same response — never reveal whether an account exists.
         return render_template("auth/check_email.html", email=email)
 
-    return render_template("auth/login.html", form=form)
+    return _render_login(form)
+
+
+def _render_login(form: LoginForm):
+    return render_template(
+        "auth/login.html",
+        form=form,
+        turnstile_site_key=current_app.config["TURNSTILE_SITE_KEY"],
+    )
 
 
 @bp.route("/auth/verify/<token>")

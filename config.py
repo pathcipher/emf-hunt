@@ -53,6 +53,16 @@ class Config:
     # use redis:// if you run multiple workers.
     RATELIMIT_STORAGE_URI = os.environ.get("RATELIMIT_STORAGE_URI", "memory://")
 
+    # Cloudflare Turnstile (login CAPTCHA). When the secret is unset the CAPTCHA
+    # is disabled (dev/test). Set both keys in production to require it.
+    TURNSTILE_SITE_KEY = os.environ.get("TURNSTILE_SITE_KEY", "")
+    TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY", "")
+
+    # SES bounce/complaint webhook (Amazon SNS). Optional topic-ARN allowlist;
+    # signature verification is on by default and should stay on in production.
+    SES_SNS_TOPIC_ARN = os.environ.get("SES_SNS_TOPIC_ARN", "")
+    SES_WEBHOOK_VERIFY = _bool(os.environ.get("SES_WEBHOOK_VERIFY"), default=True)
+
     # Dynamic puzzle content cache duration (seconds).
     # Cache responses from handler URLs to reduce load on external services.
     PUZZLE_CONTENT_CACHE_SECONDS = int(os.environ.get("PUZZLE_CONTENT_CACHE_SECONDS", "60"))

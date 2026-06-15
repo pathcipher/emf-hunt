@@ -16,6 +16,9 @@ class TestConfig(Config):
     SECRET_KEY = "test-secret-key"
     EMAIL_BACKEND = "console"
     BASE_URL = "http://localhost"
+    TURNSTILE_SITE_KEY = ""  # CAPTCHA disabled unless a test enables it
+    TURNSTILE_SECRET_KEY = ""
+    SES_WEBHOOK_VERIFY = False  # skip SNS signature checks in tests
 
 
 @pytest.fixture

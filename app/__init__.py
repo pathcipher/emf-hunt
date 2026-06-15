@@ -83,12 +83,17 @@ def create_app(config_object: type = Config) -> Flask:
     from .branding import bp as branding_bp
     from .puzzles.routes import bp as puzzles_bp
     from .teams.routes import bp as teams_bp
+    from .webhooks import bp as webhooks_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(teams_bp)
     app.register_blueprint(puzzles_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(branding_bp)
+    app.register_blueprint(webhooks_bp)
+    # SNS posts without a CSRF token; the route's trust comes from SNS signature
+    # verification instead (see app/webhooks.py).
+    csrf.exempt(webhooks_bp)
 
     @app.get("/healthz")
     def healthz():
@@ -117,21 +122,36 @@ def create_app(config_object: type = Config) -> Flask:
 
 
 def _register_security_headers(app: Flask) -> None:
+    # When Turnstile is enabled the login page loads Cloudflare's script and an
+    # iframe, so the CSP must allow that origin (only then — kept tight otherwise).
+    turnstile = "https://challenges.cloudflare.com"
+    if app.config.get("TURNSTILE_SITE_KEY"):
+        script_src = f"script-src 'self' 'unsafe-inline' {turnstile}; "
+        frame_src = f"frame-src {turnstile}; "
+        connect_src = f"connect-src 'self' {turnstile}; "
+    else:
+        script_src = "script-src 'self' 'unsafe-inline'; "
+        frame_src = ""
+        connect_src = ""
+
+    csp = (
+        "default-src 'self'; "
+        + script_src
+        + "style-src 'self' 'unsafe-inline'; "
+        + "img-src 'self' data:; "
+        + connect_src
+        + frame_src
+        + "object-src 'none'; "
+        + "base-uri 'self'; "
+        + "frame-ancestors 'self'"
+    )
+
     @app.after_request
     def set_security_headers(resp):
         # Player-supplied content is always escaped by Jinja; puzzle HTML/JS is
         # trusted admin content. CSP allows inline scripts (puzzles run inline JS)
         # while still blocking plugins, framing, and base-tag hijacking.
-        resp.headers.setdefault(
-            "Content-Security-Policy",
-            "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline'; "
-            "style-src 'self' 'unsafe-inline'; "
-            "img-src 'self' data:; "
-            "object-src 'none'; "
-            "base-uri 'self'; "
-            "frame-ancestors 'self'",
-        )
+        resp.headers.setdefault("Content-Security-Policy", csp)
         # Let puzzles read GPS (requires HTTPS / secure context in the browser).
         resp.headers.setdefault("Permissions-Policy", "geolocation=(self)")
         resp.headers.setdefault("X-Content-Type-Options", "nosniff")

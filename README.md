@@ -120,6 +120,25 @@ Choose an email backend:
   SendGrid, etc.). The backend interface lives in [`app/email.py`](app/email.py) — adapt
   the request shape to your provider.
 
+### Login abuse protection
+
+Because anyone can type any address into the magic-link form, an open login is a spam vector
+(unsolicited "login link" emails → complaints → SES suspension). Defences:
+
+- **Per-email rate limits** are always on (`/login` is capped per target address).
+- **Cloudflare Turnstile** (optional CAPTCHA): set `TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY`
+  to require a challenge before any email is sent. Disabled when unset. The CSP automatically
+  allows Cloudflare's origin only when enabled.
+- **SES complaint/bounce suppression**: point an SNS topic for your SES identity's bounces and
+  complaints at `POST /webhooks/ses`. The endpoint verifies the SNS signature, then records
+  complained / permanently-bounced addresses; the login flow silently stops emailing them
+  (responding identically, so suppression isn't observable). Set `SES_SNS_TOPIC_ARN` to reject
+  notifications from other topics. This is what keeps the SES account in good standing — AWS
+  suspends senders who keep mailing complainers.
+
+Also configure **SPF, DKIM, and DMARC** for your sending domain (ideally a dedicated subdomain)
+so providers treat the mail as legitimate transactional email.
+
 ## Dynamic puzzle content
 
 Puzzles can fetch content from a remote handler URL for time-based or dynamic content (e.g.,
@@ -187,6 +206,9 @@ app/
   media.py        per-puzzle image storage (upload / list / delete)
   settings.py     admin-editable key/value content (e.g. success page)
   branding.py     customisable favicon + logo (public, on the media volume)
+  captcha.py      Cloudflare Turnstile verification (login)
+  suppression.py  email suppression list (complaints / hard bounces)
+  webhooks.py     SES/SNS bounce + complaint webhook (signature-verified)
   auth/  teams/  puzzles/  admin/    blueprints
   templates/  static/
 config.py         env-driven configuration
