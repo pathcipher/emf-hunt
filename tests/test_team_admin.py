@@ -153,6 +153,61 @@ def test_reset_solve_requires_admin(client, app, login):
     assert r.status_code == 403
 
 
+def test_delete_player_keeps_team_solves(client, app, login):
+    login("boss@example.com")
+    ids = _setup(app)
+    from app.models import Solve, Submission, Team, User
+
+    client.post(f"/admin/members/{ids['u1']}/delete", data={"return_team": ids["alpha"]})
+
+    assert _get(app, User, ids["u1"]) is None  # player gone
+    with app.app_context():
+        # Their submission is removed (user_id is NOT NULL)...
+        assert Submission.query.filter_by(user_id=ids["u1"]).count() == 0
+        # ...but the team's solve survives, just detached from the solver.
+        solve = Solve.query.filter_by(team_id=ids["alpha"]).first()
+        assert solve is not None and solve.solved_by_id is None
+    assert _get(app, Team, ids["alpha"]) is not None  # team intact
+    assert _get(app, User, ids["u2"]).team_id == ids["alpha"]  # teammate untouched
+
+
+def test_delete_unassigned_player(client, app, login):
+    login("boss@example.com")
+    _setup(app)
+    from app.extensions import db
+    from app.models import User
+
+    with app.app_context():
+        loner = User(email="loner@example.com")
+        db.session.add(loner)
+        db.session.commit()
+        loner_id = loner.id
+
+    client.post(f"/admin/members/{loner_id}/delete", data={})
+    assert _get(app, User, loner_id) is None
+
+
+def test_cannot_delete_last_admin(client, app, login):
+    login("boss@example.com")
+    _setup(app)
+    from app.extensions import db
+    from app.models import User
+
+    with app.app_context():
+        boss_id = db.session.query(User).filter_by(email="boss@example.com").first().id
+
+    client.post(f"/admin/members/{boss_id}/delete", data={})
+    assert _get(app, User, boss_id) is not None  # refused — last admin
+
+
+def test_delete_player_requires_admin(client, app, login):
+    ids = _setup(app)
+    login("boss@example.com")
+    client.post("/logout")
+    login("npc@example.com")  # not admin
+    assert client.post(f"/admin/members/{ids['u2']}/delete", data={}).status_code == 403
+
+
 def test_delete_team_cleans_up(client, app, login):
     login("boss@example.com")
     ids = _setup(app)

@@ -552,3 +552,33 @@ def member_toggle_admin(user_id: int):
         db.session.commit()
         flash(f"{_member_label(user)} is now an admin.", "success")
     return _redirect_after_member_action()
+
+
+@bp.route("/members/<int:user_id>/delete", methods=["POST"])
+@login_required
+@admin_required
+def member_delete(user_id: int):
+    user = db.session.get(User, user_id)
+    if user is None:
+        abort(404)
+    # Never delete the only remaining admin (would lock everyone out of /admin).
+    if user.is_admin and User.query.filter_by(is_admin=True).count() <= 1:
+        flash("Can't delete the last admin.", "error")
+        return _redirect_after_member_action()
+
+    label = _member_label(user)
+    # Keep the team's progress: detach this player from their solves rather than
+    # deleting them (solved_by_id is nullable).
+    Solve.query.filter_by(solved_by_id=user.id).update(
+        {"solved_by_id": None}, synchronize_session=False
+    )
+    # Teams they created stay; just clear the creator reference.
+    Team.query.filter_by(created_by_id=user.id).update(
+        {"created_by_id": None}, synchronize_session=False
+    )
+    # Submission.user_id is NOT NULL, so this player's attempts are removed.
+    Submission.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+    db.session.delete(user)
+    db.session.commit()
+    flash(f"Deleted {label}.", "success")
+    return _redirect_after_member_action()

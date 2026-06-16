@@ -76,6 +76,12 @@
         </select>
         <button type="submit" class="btn btn-secondary btn-sm">Apply</button>
       </form>
+      <form method="post" action="{{ url_for('admin.member_delete', user_id=m.id) }}" class="inline-form"
+            onsubmit="return confirm('Delete this player? This removes their account and submission history. Team solves are kept.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="return_team" value="{{ team.id }}">
+        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+      </form>
     </div>
   </li>
   {% else %}
