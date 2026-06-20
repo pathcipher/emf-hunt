@@ -26,9 +26,18 @@ from ..branding import (
     save_branding,
 )
 from ..content import get_puzzle_content
-from ..models import Puzzle, Solve, Submission, Team, User, generate_join_code
+from ..models import (
+    Puzzle,
+    Solve,
+    Submission,
+    Suppression,
+    Team,
+    User,
+    generate_join_code,
+)
 from ..progression import current_puzzle, published_puzzles
 from ..security import admin_required
+from ..suppression import suppress, unsuppress
 from ..settings import (
     DEFAULT_SUCCESS_HTML,
     SUCCESS_HTML,
@@ -261,6 +270,39 @@ def branding_delete(kind: str):
     delete_branding(kind)
     flash(f"{kind.capitalize()} removed.", "success")
     return redirect(url_for("admin.branding"))
+
+
+@bp.route("/suppressions")
+@login_required
+@admin_required
+def suppressions():
+    rows = Suppression.query.order_by(Suppression.created_at.desc()).all()
+    return render_template("admin/suppressions.html", rows=rows)
+
+
+@bp.route("/suppressions/remove", methods=["POST"])
+@login_required
+@admin_required
+def suppression_remove():
+    email = (request.form.get("email") or "").strip()
+    if unsuppress(email):
+        flash(f"Unblocked {email} — they can request login links again.", "success")
+    else:
+        flash("That address isn't on the blocklist.", "error")
+    return redirect(url_for("admin.suppressions"))
+
+
+@bp.route("/suppressions/add", methods=["POST"])
+@login_required
+@admin_required
+def suppression_add():
+    email = (request.form.get("email") or "").strip()
+    if "@" not in email or " " in email:
+        flash("Enter a valid email address.", "error")
+    else:
+        suppress(email, "manual")
+        flash(f"Blocked {email}.", "success")
+    return redirect(url_for("admin.suppressions"))
 
 
 @bp.route("/progress")

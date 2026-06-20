@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Email blocklist · Admin{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin.dashboard') }}">← Mission Control</a></p>
+<h1>Email blocklist</h1>
+<p class="muted">
+  Addresses here won’t receive login links. Complaints and hard bounces are added
+  automatically (via SES); you can also block or unblock manually.
+</p>
+
+<form method="post" action="{{ url_for('admin.suppression_add') }}" class="card inline-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="email" name="email" placeholder="block-this@example.com"
+         autocomplete="off" aria-label="Email to block">
+  <button type="submit" class="btn btn-secondary">Block</button>
+</form>
+
+{% if rows %}
+<ul class="reset-list">
+  {% for s in rows %}
+  <li class="reset-item card">
+    <span class="reset-label">{{ s.email }}</span>
+    <span class="muted reset-time">{{ s.reason or '—' }} · {{ s.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+    <form method="post" action="{{ url_for('admin.suppression_remove') }}" class="inline-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="email" value="{{ s.email }}">
+      <button type="submit" class="link-btn danger">Unblock</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="muted">No blocked addresses.</p>
+{% endif %}
+{% endblock %}

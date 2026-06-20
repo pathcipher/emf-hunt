@@ -121,6 +121,47 @@ def test_webhook_rejects_wrong_topic(client, app):
     assert r.status_code == 403
 
 
+def test_admin_can_remove_block(client, app, login, magic):
+    from app.suppression import is_suppressed, suppress
+
+    login("boss@example.com")  # admin
+    with app.app_context():
+        suppress("blocked@example.com", "complaint")
+
+    # The blocklist page lists it.
+    page = client.get("/admin/suppressions")
+    assert page.status_code == 200
+    assert b"blocked@example.com" in page.data
+
+    # Unblock it.
+    client.post("/admin/suppressions/remove", data={"email": "blocked@example.com"})
+    with app.app_context():
+        assert is_suppressed("blocked@example.com") is False
+
+    # And they can receive a login link again (log out first; /login no-ops when authed).
+    client.post("/logout")
+    client.post("/login", data={"email": "blocked@example.com"})
+    assert magic.get("email") == "blocked@example.com"
+
+
+def test_admin_can_manually_block(client, app, login):
+    from app.suppression import is_suppressed
+
+    login("boss@example.com")
+    client.post("/admin/suppressions/add", data={"email": "spammer@example.com"})
+    with app.app_context():
+        assert is_suppressed("spammer@example.com") is True
+
+
+def test_blocklist_requires_admin(client, login):
+    login("boss@example.com")
+    client.post("/logout")
+    login("npc@example.com")  # not admin
+    assert client.get("/admin/suppressions").status_code == 403
+    assert client.post("/admin/suppressions/remove", data={"email": "a@b.com"}).status_code == 403
+    assert client.post("/admin/suppressions/add", data={"email": "a@b.com"}).status_code == 403
+
+
 def test_sns_cert_url_guard_blocks_ssrf():
     from app.webhooks import _is_aws_sns_url
 
