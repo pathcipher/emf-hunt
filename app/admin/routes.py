@@ -84,18 +84,18 @@ def puzzle_new():
         if Puzzle.query.filter_by(order_index=form.order_index.data).first():
             flash("A puzzle already uses that order number.", "error")
         else:
-            db.session.add(
-                Puzzle(
-                    order_index=form.order_index.data,
-                    title=form.title.data.strip(),
-                    content_html=form.content_html.data or "",
-                    answer=form.answer.data.strip(),
-                    is_published=form.is_published.data,
-                )
+            puzzle = Puzzle(
+                order_index=form.order_index.data,
+                title=form.title.data.strip(),
+                content_html=form.content_html.data or "",
+                answer=form.answer.data.strip(),
+                is_published=form.is_published.data,
             )
+            db.session.add(puzzle)
             db.session.commit()
             flash("Puzzle created.", "success")
-            return redirect(url_for("admin.puzzles"))
+            # Continue on the new puzzle's edit page (so you can add images, etc.).
+            return redirect(url_for("admin.puzzle_edit", puzzle_id=puzzle.id))
     return render_template("admin/puzzle_form.html", form=form, mode="new")
 
 
@@ -122,7 +122,8 @@ def puzzle_edit(puzzle_id: int):
             puzzle.is_published = form.is_published.data
             db.session.commit()
             flash("Puzzle saved.", "success")
-            return redirect(url_for("admin.puzzles"))
+            # Stay on the edit page so authoring is iterative (not back to the list).
+            return redirect(url_for("admin.puzzle_edit", puzzle_id=puzzle.id))
     return render_template(
         "admin/puzzle_form.html",
         form=form,
