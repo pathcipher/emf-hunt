@@ -312,6 +312,6 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px
 @media (min-width: 700px) {
   h1 { font-size: 2rem; }
   .stat-grid { grid-template-columns: repeat(4, 1fr); }
-  .form-actions, .admin-actions { flex-direction: row; }
+  .form-actions, .admin-actions { flex-direction: row; flex-wrap: wrap; }
   .btn { width: auto; }
 }
