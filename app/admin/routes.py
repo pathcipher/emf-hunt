@@ -12,6 +12,7 @@ from flask import (
     url_for,
 )
 from flask_login import login_required
+from sqlalchemy import distinct, func
 
 from ..extensions import db
 from ..media import (
@@ -57,12 +58,33 @@ def _sort_ts(dt) -> float:
 @login_required
 @admin_required
 def dashboard():
+    published_ids = [p.id for p in published_puzzles()]
+    total_published = len(published_ids)
+
+    # Teams that have made ≥1 guess / ≥1 solve.
+    teams_with_guess = db.session.query(Submission.team_id).distinct().count()
+    teams_with_solve = db.session.query(Solve.team_id).distinct().count()
+
+    # Teams that have solved every published puzzle (100%).
+    teams_full = 0
+    if total_published:
+        per_team = (
+            db.session.query(func.count(distinct(Solve.puzzle_id)))
+            .filter(Solve.puzzle_id.in_(published_ids))
+            .group_by(Solve.team_id)
+            .all()
+        )
+        teams_full = sum(1 for (solved,) in per_team if solved == total_published)
+
     stats = {
         "puzzles": Puzzle.query.count(),
-        "published": Puzzle.query.filter_by(is_published=True).count(),
+        "published": total_published,
         "teams": Team.query.count(),
         "players": User.query.count(),
         "submissions": Submission.query.count(),
+        "teams_with_guess": teams_with_guess,
+        "teams_with_solve": teams_with_solve,
+        "teams_full": teams_full,
     }
     return render_template("admin/dashboard.html", stats=stats)
 
@@ -72,7 +94,29 @@ def dashboard():
 @admin_required
 def puzzles():
     items = Puzzle.query.order_by(Puzzle.order_index.asc()).all()
-    return render_template("admin/puzzles.html", puzzles=items)
+    total_teams = Team.query.count()
+
+    # Per-puzzle: distinct teams that have guessed / solved it.
+    started = dict(
+        db.session.query(Submission.puzzle_id, func.count(distinct(Submission.team_id)))
+        .group_by(Submission.puzzle_id)
+        .all()
+    )
+    solved = dict(
+        db.session.query(Solve.puzzle_id, func.count(distinct(Solve.team_id)))
+        .group_by(Solve.puzzle_id)
+        .all()
+    )
+    rows = [
+        {
+            "puzzle": p,
+            "started": started.get(p.id, 0),
+            "solved": solved.get(p.id, 0),
+            "pct": round(100 * solved.get(p.id, 0) / total_teams) if total_teams else 0,
+        }
+        for p in items
+    ]
+    return render_template("admin/puzzles.html", rows=rows, total_teams=total_teams)
 
 
 @bp.route("/puzzles/new", methods=["GET", "POST"])

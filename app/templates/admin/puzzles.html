@@ -4,21 +4,26 @@
 <h1>Puzzles</h1>
 <p><a class="btn" href="{{ url_for('admin.puzzle_new') }}">+ New puzzle</a></p>
 
-<ul class="admin-list">
-  {% for p in puzzles %}
+<ul class="admin-list puzzle-list">
+  {% for r in rows %}
   <li class="card">
     <div class="admin-list-row">
-      <span class="order-badge">#{{ p.order_index }}</span>
-      <span class="admin-list-title">{{ p.title }}</span>
-      {% if p.is_published %}
+      <span class="order-badge">#{{ r.puzzle.order_index }}</span>
+      <span class="admin-list-title">{{ r.puzzle.title }}</span>
+      {% if r.puzzle.is_published %}
         <span class="badge badge-on">live</span>
       {% else %}
         <span class="badge">draft</span>
       {% endif %}
     </div>
+    <p class="muted puzzle-stats">
+      {{ r.started }} team{{ '' if r.started == 1 else 's' }} started ·
+      {{ r.pct }}% solved
+      <span class="muted">({{ r.solved }}/{{ total_teams }})</span>
+    </p>
     <span class="row-links">
-      <a href="{{ url_for('admin.puzzle_edit', puzzle_id=p.id) }}">Edit →</a>
-      <a href="{{ url_for('admin.puzzle_preview', puzzle_id=p.id) }}" target="_blank" rel="noopener">Preview ↗</a>
+      <a href="{{ url_for('admin.puzzle_edit', puzzle_id=r.puzzle.id) }}">Edit →</a>
+      <a href="{{ url_for('admin.puzzle_preview', puzzle_id=r.puzzle.id) }}" target="_blank" rel="noopener">Preview ↗</a>
     </span>
   </li>
   {% else %}
