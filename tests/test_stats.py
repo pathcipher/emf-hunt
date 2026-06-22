@@ -63,3 +63,24 @@ def test_stats_zero_safe(client, app, login):
     login("boss@example.com")  # admin, no teams/puzzles seeded
     assert client.get("/admin/").status_code == 200
     assert client.get("/admin/puzzles").status_code == 200
+
+
+def test_no_answer_tag(client, app, login):
+    from app.extensions import db
+    from app.models import Puzzle
+
+    login("boss@example.com")
+    with app.app_context():
+        db.session.add_all([
+            Puzzle(order_index=1, title="Real", content_html="x", answer='["hello"]', is_published=True),
+            Puzzle(order_index=2, title="Empty", content_html="x", answer="", is_published=False),
+            Puzzle(order_index=3, title="Underscore", content_html="x", answer="_", is_published=False),
+            Puzzle(order_index=4, title="JSON underscore", content_html="x", answer='["_"]', is_published=False),
+        ])
+        db.session.commit()
+
+    body = client.get("/admin/puzzles").get_data(as_text=True)
+    # The "no answer" tag appears for the three placeholder puzzles, not the real one.
+    assert body.count("no answer") == 3
+    # Sanity: the real puzzle row exists and isn't flagged near its title.
+    assert "Real" in body

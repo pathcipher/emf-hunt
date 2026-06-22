@@ -163,6 +163,7 @@ textarea.code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace
   background: rgba(255, 255, 255, 0.08); color: var(--muted); border: 1px solid var(--card-border);
 }
 .badge-on { color: var(--ok); border-color: rgba(94, 240, 168, 0.5); }
+.badge-danger { color: var(--danger); border-color: rgba(255, 107, 129, 0.5); }
 .progress-pill {
   display: inline-block; font-size: 0.8rem; color: var(--accent);
   border: 1px solid rgba(106, 215, 255, 0.4); border-radius: 999px; padding: 0.2rem 0.7rem;

@@ -54,6 +54,11 @@ def _sort_ts(dt) -> float:
     return dt.timestamp() if dt is not None else 0.0
 
 
+def _needs_answer(puzzle) -> bool:
+    """True when a puzzle has no real answer set (empty, or just a '_' placeholder)."""
+    return not any(a.strip() and a.strip() != "_" for a in puzzle.get_answers())
+
+
 @bp.route("/")
 @login_required
 @admin_required
@@ -113,6 +118,7 @@ def puzzles():
             "started": started.get(p.id, 0),
             "solved": solved.get(p.id, 0),
             "pct": round(100 * solved.get(p.id, 0) / total_teams) if total_teams else 0,
+            "needs_answer": _needs_answer(p),
         }
         for p in items
     ]
