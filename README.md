@@ -154,8 +154,9 @@ edit page, e.g. `cipher, outdoor, hard`). In parallel mode players can filter th
 list by tag. Tags also show on the puzzle page and the admin puzzle list. They're purely
 cosmetic/organisational in sequential mode.
 
-`PARALLEL_MODE` is a deploy-time setting — change it in the environment and restart the
-container (`docker compose ... up -d`); Watchtower won't restart on an env change alone.
+**Switching modes.** Admins flip the mode at runtime from **Mission Control → Progression
+mode** (no restart needed). The `PARALLEL_MODE` env var is just the *default* used until an
+admin first toggles it; after that, the admin choice (stored in the settings table) wins.
 
 ## Dynamic puzzle content
 

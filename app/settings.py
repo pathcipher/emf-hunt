@@ -10,6 +10,7 @@ from .models import Setting
 
 # Setting keys.
 SUCCESS_HTML = "success_html"
+PARALLEL_MODE_KEY = "parallel_mode"  # "true" / "false"; unset -> fall back to config
 
 # Shown when no custom success page has been set.
 DEFAULT_SUCCESS_HTML = (

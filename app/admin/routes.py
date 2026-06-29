@@ -41,6 +41,7 @@ from ..security import admin_required
 from ..suppression import suppress, unsuppress
 from ..settings import (
     DEFAULT_SUCCESS_HTML,
+    PARALLEL_MODE_KEY,
     SUCCESS_HTML,
     get_setting,
     set_setting,
@@ -323,6 +324,22 @@ def branding_delete(kind: str):
     delete_branding(kind)
     flash(f"{kind.capitalize()} removed.", "success")
     return redirect(url_for("admin.branding"))
+
+
+@bp.route("/mode", methods=["POST"])
+@login_required
+@admin_required
+def set_mode():
+    """Toggle the event's progression mode (sequential ↔ parallel)."""
+    parallel = request.form.get("parallel") == "on"
+    set_setting(PARALLEL_MODE_KEY, "true" if parallel else "false")
+    flash(
+        "Parallel mode on — all published puzzles are open."
+        if parallel
+        else "Sequential mode on — one puzzle at a time.",
+        "success",
+    )
+    return redirect(url_for("admin.dashboard"))
 
 
 @bp.route("/suppressions")

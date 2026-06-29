@@ -103,12 +103,17 @@ def create_app(config_object: type = Config) -> Flask:
     @app.context_processor
     def inject_template_globals():
         # Make site_name and contact info available in every template.
+        try:
+            from .progression import parallel_mode
+            pmode = parallel_mode()
+        except Exception:  # never let this break a render (e.g. DB hiccup)
+            pmode = bool(app.config.get("PARALLEL_MODE", False))
         return {
             "site_name": app.config["SITE_NAME"],
             "contact_name": app.config["CONTACT_NAME"],
             "contact_email": app.config["CONTACT_EMAIL"],
             "contact_phone": app.config["CONTACT_PHONE"],
-            "parallel_mode": app.config.get("PARALLEL_MODE", False),
+            "parallel_mode": pmode,
         }
 
     _register_security_headers(app)

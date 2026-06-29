@@ -92,6 +92,38 @@ def test_tag_chips_rendered(client, app, login):
         assert tag in body
 
 
+# --- Admin runtime toggle --------------------------------------------------
+
+def test_admin_toggle_switches_mode(client, app, login, two_puzzles):
+    login("boss@example.com")  # admin + player
+    client.post("/team/create", data={"name": "Crew"})
+
+    # Config default is sequential -> puzzle 2 locked.
+    assert client.get("/puzzle/2").status_code == 403
+
+    # Toggle parallel ON via the admin UI; setting overrides config.
+    client.post("/admin/mode", data={"parallel": "on"})
+    assert client.get("/puzzle/2").status_code == 200
+
+    # Toggle back to sequential.
+    client.post("/admin/mode", data={"parallel": "off"})
+    assert client.get("/puzzle/2").status_code == 403
+
+
+def test_mode_toggle_requires_admin(client, login):
+    login("boss@example.com")
+    client.post("/logout")
+    login("npc@example.com")  # not admin
+    assert client.post("/admin/mode", data={"parallel": "on"}).status_code == 403
+
+
+def test_dashboard_shows_mode_toggle(client, app, login):
+    login("boss@example.com")
+    body = client.get("/admin/").get_data(as_text=True)
+    assert "Progression mode" in body
+    assert "Switch to parallel" in body  # currently sequential
+
+
 # --- Admin can set tags ----------------------------------------------------
 
 def test_admin_sets_tags(client, app, login):

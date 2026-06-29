@@ -9,10 +9,18 @@ from __future__ import annotations
 from flask import current_app
 
 from .models import Puzzle, Team
+from .settings import PARALLEL_MODE_KEY, get_setting
 
 
 def parallel_mode() -> bool:
-    """True when every published puzzle is open at once (no sequential lock)."""
+    """True when every published puzzle is open at once (no sequential lock).
+
+    The admin UI toggle (a setting) wins; when it's never been set, fall back to
+    the PARALLEL_MODE env default.
+    """
+    val = get_setting(PARALLEL_MODE_KEY, "")
+    if val:
+        return val == "true"
     return bool(current_app.config.get("PARALLEL_MODE"))
 
 
