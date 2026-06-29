@@ -324,6 +324,7 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px
 
 /* Footer */
 .site-footer { padding: 1.5rem 1.1rem 2rem; text-align: center; font-size: 0.85rem; }
+.footer-version { color: var(--muted); font-size: 0.75rem; opacity: 0.7; margin-top: 0.4rem; font-variant-numeric: tabular-nums; }
 
 /* Roomier on tablets / laptops (secondary target) */
 @media (min-width: 700px) {

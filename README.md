@@ -88,6 +88,26 @@ Authentication uses the built-in `GITHUB_TOKEN` — no extra secrets to configur
 requests build the image (to catch breakage) but do not publish. The package starts out
 private; make it public in the repo's **Packages** settings if you want unauthenticated pulls.
 
+## Versioning & releases
+
+The project follows [Semantic Versioning](https://semver.org). The version lives in
+[`app/__version__.py`](app/__version__.py), is shown in the **site footer**, and changes are
+recorded in [`CHANGELOG.md`](CHANGELOG.md).
+
+To cut a release:
+
+1. Bump `__version__` in [`app/__version__.py`](app/__version__.py) and move the
+   `CHANGELOG.md` entries under a new `## [X.Y.Z]` heading.
+2. Commit, then tag and push:
+   ```bash
+   git tag v0.1.0 && git push origin v0.1.0
+   ```
+3. CI builds and publishes a matching image: `ghcr.io/<owner>/emf-hunt:0.1.0`
+   (plus `0.1` and `latest`).
+
+The footer string can be overridden per-build with the `APP_VERSION` env var (e.g. to append
+a commit SHA); otherwise it shows the packaged version.
+
 ## Security model
 
 This repo is safe to make public. None of the sensitive material lives in code:
