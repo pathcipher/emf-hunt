@@ -27,6 +27,10 @@ USER appuser
 # Default media location inside the container (override via env if desired).
 ENV MEDIA_ROOT=/app/media
 
+# Commit SHA baked in at build time, shown in the footer (build identifier).
+ARG APP_REVISION=""
+ENV APP_REVISION=${APP_REVISION}
+
 # Declared so the image documents its writable data dirs; compose binds named volumes.
 VOLUME ["/app/instance", "/app/media"]
 

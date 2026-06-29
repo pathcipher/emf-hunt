@@ -19,3 +19,10 @@ def test_app_version_env_override(client, monkeypatch):
     monkeypatch.setenv("APP_VERSION", "9.9.9-rc1")
     body = client.get("/login").get_data(as_text=True)
     assert "v9.9.9-rc1" in body
+
+
+def test_build_revision_shown_when_set(client, monkeypatch):
+    monkeypatch.setenv("APP_REVISION", "abcdef1234567890")
+    body = client.get("/login").get_data(as_text=True)
+    assert "abcdef1" in body  # short SHA
+    assert "abcdef1234567890" not in body  # truncated to 7

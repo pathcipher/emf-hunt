@@ -115,9 +115,11 @@ def create_app(config_object: type = Config) -> Flask:
             "contact_email": app.config["CONTACT_EMAIL"],
             "contact_phone": app.config["CONTACT_PHONE"],
             "parallel_mode": pmode,
-            # APP_VERSION lets a build stamp a more specific string (e.g. with a
-            # commit SHA); otherwise show the packaged semantic version.
+            # APP_VERSION lets a build stamp a more specific string; otherwise show
+            # the packaged semantic version. APP_REVISION (commit SHA, baked in at
+            # build time) changes every deploy so you can confirm what's live.
             "app_version": os.environ.get("APP_VERSION") or __version__,
+            "app_revision": (os.environ.get("APP_REVISION") or "")[:7],
         }
 
     _register_security_headers(app)

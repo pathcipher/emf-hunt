@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
+  {# Site already ships a dark theme — ask Dark Reader not to re-process it. #}
+  <meta name="darkreader-lock">
   <title>{% block title %}{{ site_name }}{% endblock %}</title>
   {% if favicon_url %}<link rel="icon" href="{{ favicon_url }}">{% endif %}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -62,7 +64,7 @@
         {%- if contact_phone %} or <a href="tel:{{ contact_phone }}">{{ contact_phone }}</a>{% endif %}.
       </p>
     {% endif %}
-    <p class="footer-version">v{{ app_version }}</p>
+    <p class="footer-version">v{{ app_version }}{% if app_revision %} · {{ app_revision }}{% endif %}</p>
   </footer>
 </body>
 </html>

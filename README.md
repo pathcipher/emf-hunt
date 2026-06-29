@@ -105,8 +105,10 @@ To cut a release:
 3. CI builds and publishes a matching image: `ghcr.io/<owner>/emf-hunt:0.1.0`
    (plus `0.1` and `latest`).
 
-The footer string can be overridden per-build with the `APP_VERSION` env var (e.g. to append
-a commit SHA); otherwise it shows the packaged version.
+The footer shows the packaged version, plus a short **commit SHA** baked into the image at
+build time (`APP_REVISION`, set from `github.sha` by CI) — so it changes on every deploy and
+lets you confirm exactly which build is live. `APP_VERSION` can override the version string
+itself if needed.
 
 ## Security model
 
