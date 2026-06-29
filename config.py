@@ -27,6 +27,10 @@ class Config:
     # Display name shown across the UI and in emails.
     SITE_NAME = os.environ.get("SITE_NAME", "Pathcipher@EMF")
 
+    # Progression mode. Sequential (default) gives a team one puzzle at a time;
+    # parallel makes every published puzzle available at once, filterable by tag.
+    PARALLEL_MODE = _bool(os.environ.get("PARALLEL_MODE"), default=False)
+
     # Contact details for the footer (optional; omitted if unset).
     CONTACT_NAME = os.environ.get("CONTACT_NAME", "")
     CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")

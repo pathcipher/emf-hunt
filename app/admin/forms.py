@@ -59,6 +59,11 @@ class PuzzleForm(FlaskForm):
             "placeholder": '["hello", "hi", "hey"]\nor\n"hello"',
         },
     )
+    tags = StringField(
+        "Tags",
+        validators=[Optional(), Length(max=255)],
+        render_kw={"placeholder": "comma-separated, e.g. cipher, outdoor, hard"},
+    )
     is_published = BooleanField("Published")
     submit = SubmitField("Save puzzle")
 

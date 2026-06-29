@@ -41,6 +41,12 @@
   </p>
   {% for e in form.answer.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
 
+  <label for="tags">
+    Tags <span class="muted">— comma-separated; shown to players and used for filtering in parallel mode</span>
+  </label>
+  {{ form.tags(id="tags", maxlength="255") }}
+  {% for e in form.tags.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+
   <label class="checkbox">{{ form.is_published() }} Published (visible to players)</label>
 
   <div class="form-actions">

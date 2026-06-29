@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Puzzles · {{ site_name }}{% endblock %}
+{% block content %}
+<h1>Puzzles</h1>
+<p class="progress-pill">{{ solved_count }}/{{ total }} solved</p>
+
+{% if finished and success_html %}
+  <article class="puzzle-body success-page card">
+    {# Trusted admin-authored HTML; team name escaped before substitution. #}
+    {{ success_html | safe }}
+  </article>
+{% endif %}
+
+{% if all_tags %}
+<nav class="tag-filter" aria-label="Filter by tag">
+  <a class="tag-chip{{ ' active' if not active_tag }}" href="{{ url_for('puzzles.index') }}">All</a>
+  {% for t in all_tags %}
+    <a class="tag-chip{{ ' active' if active_tag|lower == t|lower }}"
+       href="{{ url_for('puzzles.index', tag=t) }}">{{ t }}</a>
+  {% endfor %}
+</nav>
+{% endif %}
+
+<ul class="puzzle-cards">
+  {% for it in items %}
+  <li class="card">
+    <a class="puzzle-card-link" href="{{ url_for('puzzles.view', order=it.puzzle.order_index) }}">
+      <span class="puzzle-card-title">{{ it.puzzle.title }}</span>
+      {% if it.solved %}<span class="badge badge-on">solved</span>{% endif %}
+    </a>
+    {% if it.tags %}
+    <p class="puzzle-tags">{% for t in it.tags %}<span class="badge">{{ t }}</span>{% endfor %}</p>
+    {% endif %}
+  </li>
+  {% else %}
+  <li class="muted">No puzzles match this tag.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

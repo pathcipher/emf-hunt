@@ -7,6 +7,7 @@ from flask import (
     flash,
     redirect,
     render_template,
+    request,
     send_from_directory,
     url_for,
 )
@@ -22,7 +23,9 @@ from ..progression import (
     can_access,
     current_puzzle,
     has_finished,
+    parallel_mode,
     published_puzzles,
+    solved_puzzle_ids,
 )
 from ..security import answers_match
 from ..settings import DEFAULT_SUCCESS_HTML, SUCCESS_HTML, get_setting
@@ -38,6 +41,10 @@ def index():
         return redirect(url_for("teams.setup"))
 
     team = current_user.team
+
+    if parallel_mode():
+        return _parallel_index(team)
+
     puzzle = current_puzzle(team)
     if puzzle is None:
         if has_finished(team):
@@ -48,6 +55,40 @@ def index():
             )
         return render_template("puzzles/none.html")
     return redirect(url_for("puzzles.view", order=puzzle.order_index))
+
+
+def _parallel_index(team):
+    """Parallel mode: a filterable list of every published puzzle at once."""
+    pubs = published_puzzles()
+    if not pubs:
+        return render_template("puzzles/none.html")
+
+    solved = solved_puzzle_ids(team)
+    active_tag = (request.args.get("tag") or "").strip()
+    all_tags = sorted({t for p in pubs for t in p.get_tags()}, key=str.lower)
+
+    if active_tag:
+        shown = [
+            p for p in pubs
+            if any(t.lower() == active_tag.lower() for t in p.get_tags())
+        ]
+    else:
+        shown = pubs
+
+    items = [
+        {"puzzle": p, "solved": p.id in solved, "tags": p.get_tags()} for p in shown
+    ]
+    finished = has_finished(team)
+    return render_template(
+        "puzzles/list.html",
+        items=items,
+        all_tags=all_tags,
+        active_tag=active_tag,
+        solved_count=sum(1 for p in pubs if p.id in solved),
+        total=len(pubs),
+        finished=finished,
+        success_html=render_success_html(team) if finished else None,
+    )
 
 
 def render_success_html(team) -> str:
@@ -88,6 +129,7 @@ def view(order: int):
         already_solved=puzzle.id in solved_ids,
         total=len(published_puzzles()),
         solved_count=len(solved_ids),
+        parallel=parallel_mode(),
     )
 
 
@@ -128,10 +170,19 @@ def submit(order: int):
     team = current_user.team
     puzzle = Puzzle.query.filter_by(order_index=order).first_or_404()
 
-    # Answers are only accepted for the team's *current* puzzle.
-    current = current_puzzle(team)
-    if current is None or puzzle.id != current.id:
-        abort(403)
+    if parallel_mode():
+        # Every published puzzle is open; just enforce that it's reachable.
+        if not can_access(team, puzzle):
+            abort(403)
+    else:
+        # Sequential: answers are only accepted for the team's *current* puzzle.
+        current = current_puzzle(team)
+        if current is None or puzzle.id != current.id:
+            abort(403)
+
+    # Already solved (reachable in parallel mode) — nothing more to do.
+    if Solve.query.filter_by(team_id=team.id, puzzle_id=puzzle.id).first():
+        return redirect(url_for("puzzles.view", order=order))
 
     form = AnswerForm()
     if not form.validate_on_submit():

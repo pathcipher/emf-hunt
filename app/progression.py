@@ -6,7 +6,14 @@ All of this is enforced server-side; the UI never grants access on its own.
 """
 from __future__ import annotations
 
+from flask import current_app
+
 from .models import Puzzle, Team
+
+
+def parallel_mode() -> bool:
+    """True when every published puzzle is open at once (no sequential lock)."""
+    return bool(current_app.config.get("PARALLEL_MODE"))
 
 
 def published_puzzles() -> list[Puzzle]:
@@ -38,9 +45,14 @@ def has_finished(team: Team | None) -> bool:
 
 
 def can_access(team: Team | None, puzzle: Puzzle) -> bool:
-    """A team may access solved puzzles and its current puzzle — nothing ahead."""
+    """A team may access solved puzzles and its current puzzle — nothing ahead.
+
+    In parallel mode there is no lock: every published puzzle is accessible.
+    """
     if not puzzle.is_published:
         return False
+    if parallel_mode():
+        return True
     current = current_puzzle(team)
     if current is None:
         # Finished (or nothing locked): all published puzzles are viewable.

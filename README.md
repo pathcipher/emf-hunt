@@ -139,6 +139,24 @@ Because anyone can type any address into the magic-link form, an open login is a
 Also configure **SPF, DKIM, and DMARC** for your sending domain (ideally a dedicated subdomain)
 so providers treat the mail as legitimate transactional email.
 
+## Progression modes
+
+The event runs in one of two modes, set by `PARALLEL_MODE` (default off):
+
+- **Sequential** (default) — strict progression: a team sees one puzzle at a time and
+  must solve it to unlock the next. Enforced server-side.
+- **Parallel** (`PARALLEL_MODE=true`) — every **published** puzzle is available to every
+  team at once. The home page becomes a filterable list of all puzzles, each showing a
+  *solved* badge once done. Answers are accepted for any published puzzle.
+
+**Tags.** Each puzzle can carry comma-separated, user-visible **tags** (set on the puzzle
+edit page, e.g. `cipher, outdoor, hard`). In parallel mode players can filter the puzzle
+list by tag. Tags also show on the puzzle page and the admin puzzle list. They're purely
+cosmetic/organisational in sequential mode.
+
+`PARALLEL_MODE` is a deploy-time setting — change it in the environment and restart the
+container (`docker compose ... up -d`); Watchtower won't restart on an env change alone.
+
 ## Dynamic puzzle content
 
 Puzzles can fetch content from a remote handler URL for time-based or dynamic content (e.g.,

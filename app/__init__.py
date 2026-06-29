@@ -108,6 +108,7 @@ def create_app(config_object: type = Config) -> Flask:
             "contact_name": app.config["CONTACT_NAME"],
             "contact_email": app.config["CONTACT_EMAIL"],
             "contact_phone": app.config["CONTACT_PHONE"],
+            "parallel_mode": app.config.get("PARALLEL_MODE", False),
         }
 
     _register_security_headers(app)

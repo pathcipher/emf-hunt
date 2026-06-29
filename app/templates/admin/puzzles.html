@@ -22,6 +22,10 @@
       {{ r.pct }}% solved
       <span class="muted">({{ r.solved }}/{{ total_teams }})</span>
     </p>
+    {% set tags = r.puzzle.get_tags() %}
+    {% if tags %}
+    <p class="puzzle-tags">{% for t in tags %}<span class="badge">{{ t }}</span>{% endfor %}</p>
+    {% endif %}
     <span class="row-links">
       <a href="{{ url_for('admin.puzzle_edit', puzzle_id=r.puzzle.id) }}">Edit →</a>
       <a href="{{ url_for('admin.puzzle_preview', puzzle_id=r.puzzle.id) }}" target="_blank" rel="noopener">Preview ↗</a>

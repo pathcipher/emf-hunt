@@ -7,10 +7,17 @@
   Nothing here is recorded.
 </div>
 {% endif %}
+{% if parallel and not preview %}
+<p><a href="{{ url_for('puzzles.index') }}">← All puzzles</a></p>
+{% endif %}
 <div class="progress-pill">
   Puzzle {{ puzzle.order_index }}{% if preview %} · Preview{% elif total %} · {{ solved_count }}/{{ total }} solved{% endif %}
 </div>
 <h1>{{ puzzle.title }}</h1>
+{% set tags = puzzle.get_tags() %}
+{% if tags %}
+<p class="puzzle-tags">{% for t in tags %}<span class="badge">{{ t }}</span>{% endfor %}</p>
+{% endif %}
 
 <article class="puzzle-body">
   {# Trusted admin-authored content. May contain HTML & JS (e.g. Geolocation).
@@ -32,7 +39,7 @@
   </div>
 {% elif already_solved %}
   <p class="solved-note">✓ Your team already solved this one.</p>
-  <p><a class="btn" href="{{ url_for('puzzles.index') }}">Back to current puzzle →</a></p>
+  <p><a class="btn" href="{{ url_for('puzzles.index') }}">{{ 'Back to all puzzles' if parallel else 'Back to current puzzle' }} →</a></p>
 {% else %}
   <form method="post" action="{{ url_for('puzzles.submit', order=puzzle.order_index) }}" class="card">
     {{ form.hidden_tag() }}

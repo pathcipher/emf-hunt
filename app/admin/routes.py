@@ -139,6 +139,7 @@ def puzzle_new():
                 title=form.title.data.strip(),
                 content_html=form.content_html.data or "",
                 answer=form.answer.data.strip(),
+                tags=(form.tags.data or "").strip(),
                 is_published=form.is_published.data,
             )
             db.session.add(puzzle)
@@ -169,6 +170,7 @@ def puzzle_edit(puzzle_id: int):
             puzzle.title = form.title.data.strip()
             puzzle.content_html = form.content_html.data or ""
             puzzle.answer = form.answer.data.strip()
+            puzzle.tags = (form.tags.data or "").strip()
             puzzle.is_published = form.is_published.data
             db.session.commit()
             flash("Puzzle saved.", "success")

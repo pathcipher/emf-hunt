@@ -73,10 +73,25 @@ class Puzzle(db.Model):
     # Optional remote handler URL for dynamic puzzle content. If set, content is
     # fetched from this URL instead of using stored content_html.
     handler_url = db.Column(db.String(500), nullable=True)
+    # Comma-separated, user-visible tags (used for filtering in parallel mode).
+    # No SQL default: keeps the startup schema reconciler's ALTER TABLE simple
+    # on existing DBs (get_tags handles NULL).
+    tags = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
     updated_at = db.Column(
         db.DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False
     )
+
+    def get_tags(self) -> list[str]:
+        """Cleaned, de-duplicated (case-insensitive) tag list, order preserved."""
+        seen: set[str] = set()
+        out: list[str] = []
+        for raw in (self.tags or "").split(","):
+            tag = raw.strip()
+            if tag and tag.lower() not in seen:
+                seen.add(tag.lower())
+                out.append(tag)
+        return out
 
     def get_answers(self) -> list[str]:
         """Return the list of acceptable answers for this puzzle.
