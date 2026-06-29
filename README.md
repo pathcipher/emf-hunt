@@ -90,25 +90,21 @@ private; make it public in the repo's **Packages** settings if you want unauthen
 
 ## Versioning & releases
 
-The project follows [Semantic Versioning](https://semver.org). The version lives in
-[`app/__version__.py`](app/__version__.py), is shown in the **site footer**, and changes are
-recorded in [`CHANGELOG.md`](CHANGELOG.md).
+The project follows [Semantic Versioning](https://semver.org), computed automatically by
+[**GitVersion**](https://gitversion.net) from git history + [Conventional Commits](https://www.conventionalcommits.org)
+— no manual bumping. The bump rules live in [`GitVersion.yml`](GitVersion.yml):
 
-To cut a release:
+- `feat:` → **minor**, `fix:`/`perf:` → **patch**, a `!`/`BREAKING CHANGE:` → **major**.
+- `mode: ContinuousDeployment`, so the version advances on every mainline commit.
 
-1. Bump `__version__` in [`app/__version__.py`](app/__version__.py) and move the
-   `CHANGELOG.md` entries under a new `## [X.Y.Z]` heading.
-2. Commit, then tag and push:
-   ```bash
-   git tag v0.1.0 && git push origin v0.1.0
-   ```
-3. CI builds and publishes a matching image: `ghcr.io/<owner>/emf-hunt:0.1.0`
-   (plus `0.1` and `latest`).
+In CI, the GitVersion action computes the version and the build injects it (plus the commit
+SHA) into the image, which the **site footer** shows as `v<version> · <sha>` — so it changes
+every deploy and tells you exactly what's live. Images are also tagged with the computed
+version on GHCR. Preview locally with `dotnet-gitversion`.
 
-The footer shows the packaged version, plus a short **commit SHA** baked into the image at
-build time (`APP_REVISION`, set from `github.sha` by CI) — so it changes on every deploy and
-lets you confirm exactly which build is live. `APP_VERSION` can override the version string
-itself if needed.
+[`app/__version__.py`](app/__version__.py) is only a fallback for local runs where GitVersion
+hasn't injected `APP_VERSION`. Notable changes are still summarised in
+[`CHANGELOG.md`](CHANGELOG.md).
 
 ## Security model
 

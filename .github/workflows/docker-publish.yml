@@ -35,7 +35,19 @@ jobs:
       contents: read
       packages: write
     steps:
+      # fetch-depth: 0 — GitVersion needs full history to compute the version.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3
+        with:
+          versionSpec: "5.x"
+
+      - name: Determine version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3
 
       # Only log in for real pushes — PRs (incl. from forks) build but never publish.
       - name: Log in to GHCR
@@ -57,6 +69,7 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha,format=short
+            type=raw,value=${{ steps.gitversion.outputs.semVer }},enable={{is_default_branch}}
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Set up Buildx
@@ -70,6 +83,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
+            APP_VERSION=${{ steps.gitversion.outputs.semVer }}
             APP_REVISION=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

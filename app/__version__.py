@@ -1,11 +1,11 @@
-"""Single source of truth for the app's semantic version (https://semver.org).
+"""Fallback app version for local/dev runs.
 
-Bump this when cutting a release and tag the repo `vX.Y.Z` to match; CI then
-publishes a matching `ghcr.io/<owner>/emf-hunt:X.Y.Z` image from the tag.
+The authoritative version is computed by **GitVersion** from git history +
+Conventional Commits (see `GitVersion.yml`) and injected into the image as the
+`APP_VERSION` env var at build time — that's what the footer shows in CI builds.
 
-MAJOR.MINOR.PATCH:
-- MAJOR — incompatible changes (e.g. data model / deploy steps that need action).
-- MINOR — new functionality, backwards-compatible.
-- PATCH — backwards-compatible fixes only.
+This constant is only the fallback used when `APP_VERSION` isn't set (e.g. a
+local `flask run` or a plain `docker build` without the build-arg). Bumping it
+is optional; GitVersion drives real release numbers.
 """
 __version__ = "0.1.0"

@@ -27,7 +27,10 @@ USER appuser
 # Default media location inside the container (override via env if desired).
 ENV MEDIA_ROOT=/app/media
 
-# Commit SHA baked in at build time, shown in the footer (build identifier).
+# Version (computed by GitVersion in CI) + commit SHA, baked in at build time
+# and shown in the footer. Empty on local builds -> app falls back to __version__.
+ARG APP_VERSION=""
+ENV APP_VERSION=${APP_VERSION}
 ARG APP_REVISION=""
 ENV APP_REVISION=${APP_REVISION}
 
