@@ -187,6 +187,12 @@ textarea.code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace
 .tag-chip:hover { border-color: var(--accent); }
 .tag-chip.active { color: #04121a; background: var(--accent); border-color: var(--accent); font-weight: 650; }
 .puzzle-cards { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+.puzzle-cards li.card {
+  margin: 0;  /* let the flex gap handle spacing */
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  transition: border-color 0.15s ease;
+}
+.puzzle-cards li.card:hover { border-color: var(--accent); }
 .puzzle-card-link {
   display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
   text-decoration: none; color: var(--text); font-weight: 650;
