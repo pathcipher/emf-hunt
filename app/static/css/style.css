@@ -141,10 +141,11 @@ textarea.code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace
 .btn:hover { filter: brightness(1.06); }
 .btn-secondary {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
   box-shadow: none;
 }
+.btn-secondary:hover { border-color: var(--accent); background: rgba(255, 255, 255, 0.14); }
 
 /* Flashes */
 .flashes { margin: 0.4rem 0 0.8rem; }
@@ -166,14 +167,25 @@ textarea.code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace
 .badge-danger { color: var(--danger); border-color: rgba(255, 107, 129, 0.5); }
 
 /* Puzzle tags + parallel-mode list */
-.puzzle-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.5rem 0 0; }
-.puzzle-tags .badge { text-transform: none; }
-.tag-filter { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.9rem 0 1.1rem; }
-.tag-chip {
-  font-size: 0.82rem; padding: 0.28rem 0.75rem; border-radius: 999px; text-decoration: none;
-  border: 1px solid var(--card-border); color: var(--muted); background: rgba(255,255,255,0.04);
+.puzzle-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0 0; }
+/* Tags read as outlined violet pills so they're clearly tags, not status badges. */
+.puzzle-tags .badge {
+  text-transform: none;
+  color: var(--accent-2);
+  border: 1px solid rgba(179, 136, 255, 0.6);
+  background: rgba(179, 136, 255, 0.1);
 }
-.tag-chip.active { color: var(--accent); border-color: var(--accent); }
+.tag-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin: 0.9rem 0 1.1rem; }
+.tag-filter-label {
+  font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--muted); margin-right: 0.15rem;
+}
+.tag-chip {
+  font-size: 0.82rem; padding: 0.3rem 0.8rem; border-radius: 999px; text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.22); color: var(--text); background: rgba(255,255,255,0.06);
+}
+.tag-chip:hover { border-color: var(--accent); }
+.tag-chip.active { color: #04121a; background: var(--accent); border-color: var(--accent); font-weight: 650; }
 .puzzle-cards { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.7rem; }
 .puzzle-card-link {
   display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;

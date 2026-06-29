@@ -13,6 +13,7 @@
 
 {% if all_tags %}
 <nav class="tag-filter" aria-label="Filter by tag">
+  <span class="tag-filter-label">Filter</span>
   <a class="tag-chip{{ ' active' if not active_tag }}" href="{{ url_for('puzzles.index') }}">All</a>
   {% for t in all_tags %}
     <a class="tag-chip{{ ' active' if active_tag|lower == t|lower }}"
