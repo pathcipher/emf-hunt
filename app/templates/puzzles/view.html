@@ -15,9 +15,16 @@
 </div>
 <h1>{{ puzzle.title }}</h1>
 {% set tags = puzzle.get_tags() %}
-{% if tags %}
-<p class="puzzle-tags">{% for t in tags %}<span class="badge">{{ t }}</span>{% endfor %}</p>
-{% endif %}
+<div class="puzzle-meta-row">
+  {% if tags %}
+  <p class="puzzle-tags">{% for t in tags %}<span class="badge">{{ t }}</span>{% endfor %}</p>
+  {% endif %}
+  {% if bg_image_url %}
+  <div class="puzzle-bg-glyph" aria-hidden="true">
+    <img src="{{ bg_image_url }}" alt="">
+  </div>
+  {% endif %}
+</div>
 
 <!-- no source code is required to solve any puzzles -->
 <article class="puzzle-body">
@@ -26,12 +33,6 @@
   {{ content_html | safe }}
 </article>
 <!-- no source code is required to solve any puzzles -->
-
-{% if bg_image_url %}
-<div class="puzzle-bg-glyph" aria-hidden="true">
-  <img src="{{ bg_image_url }}" alt="">
-</div>
-{% endif %}
 
 {% if preview %}
   <div class="card">
