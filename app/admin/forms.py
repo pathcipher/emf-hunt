@@ -84,6 +84,12 @@ class SuccessPageForm(FlaskForm):
     submit = SubmitField("Save success page")
 
 
+class BgImageForm(FlaskForm):
+    # Extension validation happens in the route via app.media.save_puzzle_media.
+    file = FileField("Background glyph image")
+    submit = SubmitField("Set background")
+
+
 class BrandingUploadForm(FlaskForm):
     # Extension validation happens in the route via app.branding.save_branding.
     file = FileField("File")

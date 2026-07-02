@@ -46,7 +46,7 @@ from ..settings import (
     get_setting,
     set_setting,
 )
-from .forms import BrandingUploadForm, MediaUploadForm, PuzzleForm, SuccessPageForm
+from .forms import BgImageForm, BrandingUploadForm, MediaUploadForm, PuzzleForm, SuccessPageForm
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -177,6 +177,10 @@ def puzzle_edit(puzzle_id: int):
             flash("Puzzle saved.", "success")
             # Stay on the edit page so authoring is iterative (not back to the list).
             return redirect(url_for("admin.puzzle_edit", puzzle_id=puzzle.id))
+    bg_image_url = (
+        url_for("puzzles.media", puzzle_id=puzzle.id, filename=puzzle.bg_image)
+        if puzzle.bg_image else None
+    )
     return render_template(
         "admin/puzzle_form.html",
         form=form,
@@ -184,6 +188,8 @@ def puzzle_edit(puzzle_id: int):
         puzzle=puzzle,
         media_form=MediaUploadForm(),
         media_files=list_puzzle_media(puzzle.id),
+        bg_form=BgImageForm(),
+        bg_image_url=bg_image_url,
     )
 
 
@@ -235,6 +241,50 @@ def puzzle_media_delete(puzzle_id: int):
     return redirect(url_for("admin.puzzle_edit", puzzle_id=puzzle_id))
 
 
+@bp.route("/puzzles/<int:puzzle_id>/bg", methods=["POST"])
+@login_required
+@admin_required
+def puzzle_bg_upload(puzzle_id: int):
+    puzzle = db.session.get(Puzzle, puzzle_id)
+    if puzzle is None:
+        abort(404)
+
+    form = BgImageForm()
+    if not form.validate_on_submit():
+        flash("Upload failed (invalid request).", "error")
+        return redirect(url_for("admin.puzzle_edit", puzzle_id=puzzle_id))
+
+    file = form.file.data
+    if not file or not file.filename:
+        flash("No file selected.", "error")
+        return redirect(url_for("admin.puzzle_edit", puzzle_id=puzzle_id))
+
+    name, error = save_puzzle_media(puzzle_id, file)
+    if error:
+        flash(error, "error")
+    else:
+        puzzle.bg_image = name
+        db.session.commit()
+        flash("Background image set.", "success")
+    return redirect(url_for("admin.puzzle_edit", puzzle_id=puzzle_id))
+
+
+@bp.route("/puzzles/<int:puzzle_id>/bg/delete", methods=["POST"])
+@login_required
+@admin_required
+def puzzle_bg_delete(puzzle_id: int):
+    puzzle = db.session.get(Puzzle, puzzle_id)
+    if puzzle is None:
+        abort(404)
+
+    if puzzle.bg_image:
+        delete_puzzle_media(puzzle_id, puzzle.bg_image)
+        puzzle.bg_image = None
+        db.session.commit()
+        flash("Background image removed.", "success")
+    return redirect(url_for("admin.puzzle_edit", puzzle_id=puzzle_id))
+
+
 @bp.route("/puzzles/<int:puzzle_id>/preview")
 @login_required
 @admin_required
@@ -255,12 +305,17 @@ def puzzle_preview(puzzle_id: int):
         if dynamic:
             content_html = dynamic
 
+    bg_image_url = (
+        url_for("puzzles.media", puzzle_id=puzzle.id, filename=puzzle.bg_image)
+        if puzzle.bg_image else None
+    )
     return render_template(
         "puzzles/view.html",
         puzzle=puzzle,
         content_html=content_html,
         preview=True,
         answers=puzzle.get_answers(),
+        bg_image_url=bg_image_url,
     )
 
 

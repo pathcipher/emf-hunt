@@ -77,6 +77,8 @@ class Puzzle(db.Model):
     # No SQL default: keeps the startup schema reconciler's ALTER TABLE simple
     # on existing DBs (get_tags handles NULL).
     tags = db.Column(db.String(255), nullable=True)
+    # Filename of the faint background glyph image shown on the puzzle page.
+    bg_image = db.Column(db.String(200), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
     updated_at = db.Column(
         db.DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False

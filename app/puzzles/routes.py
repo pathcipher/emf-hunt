@@ -121,6 +121,10 @@ def view(order: int):
             content_html = dynamic_content
 
     solved_ids = {solve.puzzle_id for solve in team.solves}
+    bg_image_url = (
+        url_for("puzzles.media", puzzle_id=puzzle.id, filename=puzzle.bg_image)
+        if puzzle.bg_image else None
+    )
     return render_template(
         "puzzles/view.html",
         puzzle=puzzle,
@@ -130,6 +134,7 @@ def view(order: int):
         total=len(published_puzzles()),
         solved_count=len(solved_ids),
         parallel=parallel_mode(),
+        bg_image_url=bg_image_url,
     )
 
 

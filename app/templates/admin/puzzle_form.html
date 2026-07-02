@@ -61,6 +61,34 @@
 
 {% if mode == 'edit' %}
 <section class="card media-manager">
+  <h2>Background glyph</h2>
+  <p class="muted">
+    A faint decorative image shown between the puzzle content and the answer box.
+    Use a transparent PNG with black artwork — it will appear as a subtle overlay on the dark theme.
+  </p>
+  {% if bg_image_url %}
+    <div class="bg-glyph-preview">
+      <img src="{{ bg_image_url }}" alt="Current background glyph">
+    </div>
+    <form method="post"
+          action="{{ url_for('admin.puzzle_bg_delete', puzzle_id=puzzle.id) }}"
+          onsubmit="return confirm('Remove background image?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="link-btn danger">Remove</button>
+    </form>
+  {% else %}
+    <p class="muted">No background image set.</p>
+  {% endif %}
+  <form method="post"
+        action="{{ url_for('admin.puzzle_bg_upload', puzzle_id=puzzle.id) }}"
+        enctype="multipart/form-data" class="media-upload" style="margin-top:0.8rem;">
+    {{ bg_form.hidden_tag() }}
+    {{ bg_form.file(accept="image/*") }}
+    {{ bg_form.submit(class="btn btn-secondary") }}
+  </form>
+</section>
+
+<section class="card media-manager">
   <h2>Images</h2>
   <p class="muted">
     Uploaded images are served only to teams that can reach this puzzle — same

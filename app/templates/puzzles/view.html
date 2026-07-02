@@ -19,11 +19,19 @@
 <p class="puzzle-tags">{% for t in tags %}<span class="badge">{{ t }}</span>{% endfor %}</p>
 {% endif %}
 
+<!-- no source code is required to solve any puzzles -->
 <article class="puzzle-body">
   {# Trusted admin-authored content. May contain HTML & JS (e.g. Geolocation).
      May be dynamic (fetched from handler_url) or static (stored in DB). #}
   {{ content_html | safe }}
 </article>
+<!-- no source code is required to solve any puzzles -->
+
+{% if bg_image_url %}
+<div class="puzzle-bg-glyph" aria-hidden="true">
+  <img src="{{ bg_image_url }}" alt="">
+</div>
+{% endif %}
 
 {% if preview %}
   <div class="card">

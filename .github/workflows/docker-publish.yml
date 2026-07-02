@@ -27,6 +27,51 @@ jobs:
       - run: pip install -r requirements.txt
       - run: pytest -q
 
+  semver:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      fullSemVer: ${{ steps.gitversion.outputs.fullSemVer }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3.0.0
+        with:
+          versionSpec: '6.0.5'
+      - name: gitversion
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v3.0.0
+        with:
+          useConfigFile: "true"
+          configFilePath: "GitVersion.yml"
+      - name: Display GitVersion outputs
+        run: |
+          echo "SemVer: ${{ steps.gitversion.outputs.semVer }}"
+      - name: Create tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.git.createRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: "refs/tags/v${{ steps.gitversion.outputs.semVer }}",
+                sha: context.sha
+              })
+            } catch(e) {
+              if (e.status === 422) {
+                console.log('Tag v${{ steps.gitversion.outputs.semVer }} already exists, skipping')
+              } else {
+                throw e
+              }
+            }
+
   build-and-push:
     needs: test
     runs-on: ubuntu-latest
