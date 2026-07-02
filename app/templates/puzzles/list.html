@@ -4,6 +4,10 @@
 <h1>Puzzles</h1>
 <p class="progress-pill">{{ solved_count }}/{{ total }} solved</p>
 
+<div class="card hunt-intro">
+  <p>Answers will be words or short phrases. Some will require teamwork, many will require you to explore the site. Objects which are relevant to the puzzles should all have Pathcipher stickers on them — no breaking or hacking is required. If in doubt, contact the hint helpline below. Above anything else, we want this to be fun, so please contact us if you are stuck!</p>
+</div>
+
 {% if finished and success_html %}
   <article class="puzzle-body success-page card">
     {# Trusted admin-authored HTML; team name escaped before substitution. #}
