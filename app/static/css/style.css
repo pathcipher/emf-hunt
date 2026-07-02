@@ -348,7 +348,7 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px
   pointer-events: none;
   user-select: none;
 }
-.puzzle-bg-glyph img { max-width: min(260px, 65vw); height: auto; }
+.puzzle-bg-glyph img { width: 100%; height: auto; }
 .bg-glyph-preview { margin: 0.6rem 0; }
 .bg-glyph-preview img { max-width: 120px; height: auto; border-radius: 6px; border: 1px solid var(--card-border); }
 
