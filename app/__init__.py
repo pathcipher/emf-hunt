@@ -146,10 +146,11 @@ def _register_security_headers(app: Flask) -> None:
         frame_src = ""
         connect_src = ""
 
+    jsdelivr = "https://cdn.jsdelivr.net"
     csp = (
         "default-src 'self'; "
-        + script_src
-        + "style-src 'self' 'unsafe-inline'; "
+        + script_src.rstrip("; ") + f" {jsdelivr}; "
+        + f"style-src 'self' 'unsafe-inline' {jsdelivr}; "
         + "img-src 'self' data:; "
         + connect_src
         + frame_src
