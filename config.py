@@ -67,6 +67,11 @@ class Config:
     SES_SNS_TOPIC_ARN = os.environ.get("SES_SNS_TOPIC_ARN", "")
     SES_WEBHOOK_VERIFY = _bool(os.environ.get("SES_WEBHOOK_VERIFY"), default=True)
 
+    # Extra origins allowed in the CSP connect-src directive (space-separated).
+    # Add puzzle handler origins here so browser JS in puzzle content can fetch
+    # from them. Example: "http://vultur.mfrost.co.uk:8001 https://api.example.com"
+    EXTRA_CONNECT_SRC = os.environ.get("EXTRA_CONNECT_SRC", "")
+
     # Dynamic puzzle content cache duration (seconds).
     # Cache responses from handler URLs to reduce load on external services.
     PUZZLE_CONTENT_CACHE_SECONDS = int(os.environ.get("PUZZLE_CONTENT_CACHE_SECONDS", "60"))

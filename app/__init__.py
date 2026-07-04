@@ -137,14 +137,22 @@ def _register_security_headers(app: Flask) -> None:
     # When Turnstile is enabled the login page loads Cloudflare's script and an
     # iframe, so the CSP must allow that origin (only then — kept tight otherwise).
     turnstile = "https://challenges.cloudflare.com"
+    extra_connect = " ".join(
+        o for o in app.config.get("EXTRA_CONNECT_SRC", "").split() if o
+    )
+    connect_origins = " ".join(filter(None, [
+        "'self'",
+        turnstile if app.config.get("TURNSTILE_SITE_KEY") else "",
+        extra_connect,
+    ]))
+    connect_src = f"connect-src {connect_origins}; "
+
     if app.config.get("TURNSTILE_SITE_KEY"):
         script_src = f"script-src 'self' 'unsafe-inline' {turnstile}; "
         frame_src = f"frame-src {turnstile}; "
-        connect_src = f"connect-src 'self' {turnstile}; "
     else:
         script_src = "script-src 'self' 'unsafe-inline'; "
         frame_src = ""
-        connect_src = ""
 
     jsdelivr = "https://cdn.jsdelivr.net"
     csp = (
