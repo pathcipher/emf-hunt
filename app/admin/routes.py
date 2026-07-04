@@ -170,6 +170,7 @@ def puzzle_edit(puzzle_id: int):
             puzzle.order_index = form.order_index.data
             puzzle.title = form.title.data.strip()
             puzzle.content_html = form.content_html.data or ""
+            puzzle.handler_url = (form.handler_url.data or "").strip() or None
             puzzle.answer = form.answer.data.strip()
             puzzle.tags = (form.tags.data or "").strip()
             puzzle.is_published = form.is_published.data
