@@ -124,7 +124,14 @@ def puzzles():
         }
         for p in items
     ]
-    return render_template("admin/puzzles.html", rows=rows, total_teams=total_teams)
+    total = len(rows)
+    summary = {
+        "total": total,
+        "live": sum(1 for r in rows if r["puzzle"].is_published),
+        "missing_bg": sum(1 for r in rows if r["needs_bg"]),
+        "missing_answer": sum(1 for r in rows if r["needs_answer"]),
+    }
+    return render_template("admin/puzzles.html", rows=rows, total_teams=total_teams, summary=summary)
 
 
 @bp.route("/puzzles/new", methods=["GET", "POST"])

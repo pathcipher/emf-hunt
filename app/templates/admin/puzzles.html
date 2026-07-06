@@ -2,6 +2,13 @@
 {% block title %}Puzzles · Admin{% endblock %}
 {% block content %}
 <h1>Puzzles</h1>
+{% if summary.total %}
+<div class="puzzle-summary">
+  <span class="badge {{ 'badge-on' if summary.live == summary.total else 'badge-warn' }}">{{ summary.live }}/{{ summary.total }} Live</span>
+  <span class="badge {{ 'badge-danger' if summary.missing_bg else 'badge-on' }}">{{ summary.missing_bg }}/{{ summary.total }} Missing BG</span>
+  <span class="badge {{ 'badge-danger' if summary.missing_answer else 'badge-on' }}">{{ summary.missing_answer }}/{{ summary.total }} Missing Answer</span>
+</div>
+{% endif %}
 <p><a class="btn" href="{{ url_for('admin.puzzle_new') }}">+ New puzzle</a></p>
 
 <ul class="admin-list puzzle-list">
