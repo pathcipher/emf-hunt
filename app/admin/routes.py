@@ -120,6 +120,7 @@ def puzzles():
             "solved": solved.get(p.id, 0),
             "pct": round(100 * solved.get(p.id, 0) / total_teams) if total_teams else 0,
             "needs_answer": _needs_answer(p),
+            "needs_bg": not p.bg_image,
         }
         for p in items
     ]

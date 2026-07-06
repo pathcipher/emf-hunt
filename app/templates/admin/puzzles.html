@@ -16,6 +16,7 @@
         <span class="badge">draft</span>
       {% endif %}
       {% if r.needs_answer %}<span class="badge badge-danger">no answer</span>{% endif %}
+      {% if r.needs_bg %}<span class="badge badge-danger">no background</span>{% endif %}
     </div>
     <p class="muted puzzle-stats">
       {{ r.started }} team{{ '' if r.started == 1 else 's' }} started ·
