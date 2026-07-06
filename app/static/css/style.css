@@ -344,8 +344,8 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px
 /* Tags + background glyph side by side below the puzzle title */
 .puzzle-meta-row { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 0.8rem; }
 .puzzle-meta-row .puzzle-tags { flex: 0 0 auto; margin: 0; }
-.puzzle-bg-glyph { flex: 1; pointer-events: none; user-select: none; }
-.puzzle-bg-glyph img { width: 100%; height: auto; display: block; }
+.puzzle-bg-glyph { flex: 1; pointer-events: none; user-select: none; min-width: 0; }
+.puzzle-bg-glyph img { max-width: 100%; max-height: 2.4rem; width: auto; height: auto; display: block; object-fit: contain; }
 .bg-glyph-preview { margin: 0.6rem 0; }
 .bg-glyph-preview img { max-width: 120px; height: auto; border-radius: 6px; border: 1px solid var(--card-border); }
 
