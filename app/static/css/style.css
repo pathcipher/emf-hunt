@@ -164,6 +164,7 @@ textarea.code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace
   background: rgba(255, 255, 255, 0.08); color: var(--muted); border: 1px solid var(--card-border);
 }
 .badge-on { color: var(--ok); border-color: rgba(94, 240, 168, 0.5); }
+.badge-warn { color: #f90; border-color: rgba(255, 153, 0, 0.5); }
 .badge-danger { color: var(--danger); border-color: rgba(255, 107, 129, 0.5); }
 
 /* Puzzle tags + parallel-mode list */

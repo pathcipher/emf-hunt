@@ -13,7 +13,7 @@
       {% if r.puzzle.is_published %}
         <span class="badge badge-on">live</span>
       {% else %}
-        <span class="badge">draft</span>
+        <span class="badge badge-warn">draft</span>
       {% endif %}
       {% if r.needs_answer %}<span class="badge badge-danger">no answer</span>{% endif %}
       {% if r.needs_bg %}<span class="badge badge-danger">no background</span>{% endif %}
