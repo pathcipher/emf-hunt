@@ -86,6 +86,15 @@ class Config:
     # Image types admins may upload. Note: SVG can carry inline script — that's
     # within the existing trust boundary (only admins upload), consistent with
     # admin-authored puzzle HTML/JS.
-    MEDIA_ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp", "svg"}
+    MEDIA_ALLOWED_EXTENSIONS = {
+        # Images
+        "png", "jpg", "jpeg", "gif", "webp", "svg",
+        # Audio
+        "mp3", "ogg", "wav", "flac", "aac", "m4a", "opus",
+        # Video
+        "mp4", "webm",
+        # Documents / data
+        "pdf", "txt", "json", "csv",
+    }
     # Cap request bodies (applies to uploads too). Override with MAX_UPLOAD_MB.
     MAX_CONTENT_LENGTH = int(os.environ.get("MAX_UPLOAD_MB", "16")) * 1024 * 1024

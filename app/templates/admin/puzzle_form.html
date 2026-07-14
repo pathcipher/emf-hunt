@@ -126,7 +126,7 @@
         action="{{ url_for('admin.puzzle_media_upload', puzzle_id=puzzle.id) }}"
         enctype="multipart/form-data" class="media-upload">
     {{ media_form.hidden_tag() }}
-    {{ media_form.files(multiple=true, accept="image/*") }}
+    {{ media_form.files(multiple=true) }}
     {{ media_form.submit(class="btn btn-secondary") }}
   </form>
 </section>
