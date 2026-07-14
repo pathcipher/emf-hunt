@@ -89,9 +89,9 @@
 </section>
 
 <section class="card media-manager">
-  <h2>Images</h2>
+  <h2>Files</h2>
   <p class="muted">
-    Uploaded images are served only to teams that can reach this puzzle — same
+    Uploaded files are served only to teams that can reach this puzzle — same
     access rules as the puzzle itself. Reference one in the HTML above using its
     snippet below. Re-uploading a file with the same name overwrites it.
   </p>
@@ -100,13 +100,19 @@
     <ul class="media-list">
       {% for f in media_files %}
         {% set src = url_for('puzzles.media', puzzle_id=puzzle.id, filename=f) %}
+        {% set ext = f.rsplit('.', 1)[-1].lower() if '.' in f else '' %}
+        {% set is_image = ext in ('png', 'jpg', 'jpeg', 'gif', 'webp', 'svg') %}
         <li class="media-item">
+          {% if is_image %}
           <img class="media-thumb" src="{{ src }}" alt="{{ f }}">
+          {% else %}
+          <div class="media-thumb media-thumb-file">{{ ext }}</div>
+          {% endif %}
           <div class="media-meta">
             <span class="media-name">{{ f }}</span>
             <input class="media-snippet code" type="text" readonly
                    onclick="this.select()"
-                   value='<img src="{{ src }}" alt="">'>
+                   value="{{ src }}">
           </div>
           <form method="post"
                 action="{{ url_for('admin.puzzle_media_delete', puzzle_id=puzzle.id) }}"
