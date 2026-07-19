@@ -41,6 +41,13 @@
     </nav>
   </header>
 
+  {% if announcement_html %}
+  <div class="announcement-banner container">
+    {# Trusted admin-authored HTML, same trust boundary as puzzle content. #}
+    {{ announcement_html | safe }}
+  </div>
+  {% endif %}
+
   <main class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}

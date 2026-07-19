@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Announcement · Admin{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin.dashboard') }}">← Mission Control</a></p>
+<h1>Announcement banner</h1>
+<p class="muted">
+  Shown as a banner at the top of every page (including login). Leave blank to
+  hide it. HTML &amp; JS are allowed (trusted authoring). The current banner is
+  previewed above if one is set.
+</p>
+
+<form method="post" class="card">
+  {{ form.hidden_tag() }}
+  <label for="content_html">Announcement HTML</label>
+  {{ form.content_html(id="content_html", rows="6", class="code", spellcheck="false",
+                       placeholder="<strong>⚠ The hint helpline is down until 15:00.</strong>") }}
+  {% for e in form.content_html.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+  <div class="form-actions">
+    {{ form.submit(class="btn") }}
+  </div>
+</form>
+{% endblock %}

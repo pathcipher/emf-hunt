@@ -40,13 +40,21 @@ from ..progression import current_puzzle, published_puzzles
 from ..security import admin_required
 from ..suppression import suppress, unsuppress
 from ..settings import (
+    ANNOUNCEMENT_HTML,
     DEFAULT_SUCCESS_HTML,
     PARALLEL_MODE_KEY,
     SUCCESS_HTML,
     get_setting,
     set_setting,
 )
-from .forms import BgImageForm, BrandingUploadForm, MediaUploadForm, PuzzleForm, SuccessPageForm
+from .forms import (
+    AnnouncementForm,
+    BgImageForm,
+    BrandingUploadForm,
+    MediaUploadForm,
+    PuzzleForm,
+    SuccessPageForm,
+)
 
 bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -347,6 +355,21 @@ def success_page():
         form=form,
         preview_html=effective.replace("{{team_name}}", "The Cartographers"),
     )
+
+
+@bp.route("/announcement", methods=["GET", "POST"])
+@login_required
+@admin_required
+def announcement():
+    """Edit the site-wide announcement banner. Blank hides it."""
+    form = AnnouncementForm()
+    if form.validate_on_submit():
+        set_setting(ANNOUNCEMENT_HTML, form.content_html.data or "")
+        flash("Announcement saved.", "success")
+        return redirect(url_for("admin.announcement"))
+    if request.method == "GET":
+        form.content_html.data = get_setting(ANNOUNCEMENT_HTML, "")
+    return render_template("admin/announcement.html", form=form)
 
 
 @bp.route("/branding")

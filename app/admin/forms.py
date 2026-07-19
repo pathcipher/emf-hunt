@@ -84,6 +84,15 @@ class SuccessPageForm(FlaskForm):
     submit = SubmitField("Save success page")
 
 
+class AnnouncementForm(FlaskForm):
+    # Trusted, admin-authored HTML shown as a banner on every page. Leave blank
+    # to hide the banner entirely.
+    content_html = TextAreaField(
+        "Announcement HTML", validators=[Optional(), Length(max=10000)]
+    )
+    submit = SubmitField("Save announcement")
+
+
 class BgImageForm(FlaskForm):
     # Extension validation happens in the route via app.media.save_puzzle_media.
     file = FileField("Background glyph image")

@@ -349,6 +349,17 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px
 
 .puzzle-summary { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
 
+/* Site-wide announcement banner (admin-authored, hidden when empty) */
+.announcement-banner {
+  margin-top: 1rem;
+  padding: 0.8rem 1.1rem;
+  border: 1px solid rgba(255, 200, 87, 0.5);
+  border-radius: 12px;
+  background: rgba(255, 200, 87, 0.08);
+}
+.announcement-banner > :first-child { margin-top: 0; }
+.announcement-banner > :last-child { margin-bottom: 0; }
+
 /* Tags + background glyph side by side below the puzzle title */
 .puzzle-meta-row { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 0.8rem; }
 .puzzle-meta-row .puzzle-tags { flex: 0 0 auto; margin: 0; }

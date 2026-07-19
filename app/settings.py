@@ -11,6 +11,7 @@ from .models import Setting
 # Setting keys.
 SUCCESS_HTML = "success_html"
 PARALLEL_MODE_KEY = "parallel_mode"  # "true" / "false"; unset -> fall back to config
+ANNOUNCEMENT_HTML = "announcement_html"  # site-wide banner; empty -> hidden
 
 # Shown when no custom success page has been set.
 DEFAULT_SUCCESS_HTML = (

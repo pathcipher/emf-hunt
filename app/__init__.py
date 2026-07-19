@@ -109,7 +109,13 @@ def create_app(config_object: type = Config) -> Flask:
             pmode = parallel_mode()
         except Exception:  # never let this break a render (e.g. DB hiccup)
             pmode = bool(app.config.get("PARALLEL_MODE", False))
+        try:
+            from .settings import ANNOUNCEMENT_HTML, get_setting
+            announcement = get_setting(ANNOUNCEMENT_HTML, "").strip()
+        except Exception:
+            announcement = ""
         return {
+            "announcement_html": announcement,
             "site_name": app.config["SITE_NAME"],
             "contact_name": app.config["CONTACT_NAME"],
             "contact_email": app.config["CONTACT_EMAIL"],
